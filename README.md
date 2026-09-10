@@ -65,7 +65,7 @@ push to github and import directly into **vercel** or **netlify**. for manual ho
 
 ---
 
-> licensed under gplv3. use at your own risk.
+> licensed under gplv3. use patcher responsibly. patcher works as of september 2026
 
 for inquiries contact **hello@buwryy.net**
 
@@ -73,4 +73,4 @@ for inquiries contact **hello@buwryy.net**
 
 **made with ♥ by [buwryme](https://github.com/buwryme)**
 
-</div>
+</div>at your own risk.
