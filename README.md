@@ -16,7 +16,7 @@ personal site & client-side tiktok patcher built with react & material design 3 
 > codebase is still premature. expect breaking changes, incomplete features, and rough edges as development continues.
 
 ## requirements
--   node.js 18+
+-   node.js 20+
 -   npm or yarn
 -   modern browser
 
