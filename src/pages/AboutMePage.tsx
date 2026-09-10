@@ -16,6 +16,7 @@ export default function AboutMePage() {
   const [gamingRevealed, setGamingRevealed] = useState(false);
   const [editingRevealed, setEditingRevealed] = useState(false);
   const [projectModal, setProjectModal] = useState<{ name: string; description: string; repoUrl: string; iconSrc?: string; icon?: string; downloadUrl?: string } | null>(null);
+  const [projectModalClosing, setProjectModalClosing] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [privacyClosing, setPrivacyClosing] = useState(false);
   const [acknowledgementsOpen, setAcknowledgementsOpen] = useState(false);
@@ -413,7 +414,14 @@ export default function AboutMePage() {
       {/* Project Modal */}
       <Modal
         isOpen={!!projectModal}
-        onClose={() => setProjectModal(null)}
+        isClosing={projectModalClosing}
+        onClose={() => {
+          setProjectModalClosing(true);
+          setTimeout(() => {
+            setProjectModal(null);
+            setProjectModalClosing(false);
+          }, 200);
+        }}
         title={projectModal?.name || ''}
         titleIcon={
           projectModal?.iconSrc ? (
@@ -424,7 +432,13 @@ export default function AboutMePage() {
         }
         actions={
           <>
-            <button className="m3-btn-tonal" onClick={() => setProjectModal(null)}>
+            <button className="m3-btn-tonal" onClick={() => {
+              setProjectModalClosing(true);
+              setTimeout(() => {
+                setProjectModal(null);
+                setProjectModalClosing(false);
+              }, 200);
+            }}>
               close
             </button>
             {projectModal?.downloadUrl && (

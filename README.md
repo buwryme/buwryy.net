@@ -36,7 +36,7 @@ site runs at `http://localhost:3000`. build for prod with `npm run build` → ou
 
 ## features
 
--   **tiktok patcher:** lossless video processing client-side using ffmpeg.wasm. supports mp4/avi/mov without backend.
+-   **tiktok patcher:** lossless video processing client-side using ffmpeg.wasm. supports mp4 files, with no backend.
 -   **music player:** inline player with wavy progress bar animation & auto-pause.
 -   **projects:** interactive cards with detail modals, repo links, and downloads.
 -   **md3 expressive:** full material design 3 implementation with dark/light mode persistence.
