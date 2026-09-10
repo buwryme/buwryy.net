@@ -822,7 +822,9 @@
   backface-visibility: hidden;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
-  will-change: transform;
+  will-change: transform, filter;
+  contain: layout style paint;
+  isolation: isolate;
 }
 
 .blob-1 {
