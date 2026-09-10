@@ -1,0 +1,62 @@
+.cookie-shape-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: cookie-spin 20s linear infinite;
+}
+
+.cookie-shape-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.cookie-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cookie-svg path {
+  fill: var(--md-primary);
+  stroke: var(--md-on-primary);
+  stroke-width: 0.3;
+  opacity: 0.4;
+}
+
+.cookie-shape-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  height: 70%;
+  text-align: center;
+  color: var(--md-sys-color-on-primary-container, #21005D);
+}
+
+@keyframes cookie-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hover effect - slow down rotation */
+.cookie-shape-container:hover {
+  animation-duration: 40s;
+}
+
+/* Responsive scaling */
+@media (max-width: 768px) {
+  .cookie-shape-container {
+    animation-duration: 30s;
+  }
+}
