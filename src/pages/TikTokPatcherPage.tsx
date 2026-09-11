@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL, fetchFile } from '@ffmpeg/util';
 import Footer from '../components/Footer';
+import Modal from '../components/Modal';
 import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import Toast from '../components/Toast';
@@ -57,6 +58,8 @@ export default function TikTokPatcherPage() {
   const [privacyClosing, setPrivacyClosing] = useState(false);
   const [acknowledgementsOpen, setAcknowledgementsOpen] = useState(false);
   const [acknowledgementsClosing, setAcknowledgementsClosing] = useState(false);
+  const [nextStepsOpen, setNextStepsOpen] = useState(false);
+  const [nextStepsClosing, setNextStepsClosing] = useState(false);
   const toastTimeoutRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -331,7 +334,8 @@ export default function TikTokPatcherPage() {
       await ffmpeg.deleteFile('input.mp4');
       await ffmpeg.deleteFile(outputName);
       
-      showToast('patching complete! click save to download');
+      // Show next steps modal instead of immediately saving
+      setNextStepsOpen(true);
       
     } catch (error: any) {
       addLog(`ERROR: ${error?.message || String(error)}`);
@@ -370,11 +374,18 @@ export default function TikTokPatcherPage() {
           await writable.close();
           
           addLog('file saved successfully');
-          showToast('file saved! refreshing page...');
+          showToast('file saved successfully!');
           
+          // Close the modal and clear the file
           setTimeout(() => {
-            window.location.reload();
-          }, 1500);
+            setNextStepsClosing(true);
+            setTimeout(() => {
+              setNextStepsOpen(false);
+              setNextStepsClosing(false);
+              setProcessedFile(null);
+              setSelectedFile(null);
+            }, 300);
+          }, 500);
           return;
         } catch (err: any) {
           // User cancelled or API not available, fall back to download
@@ -396,11 +407,18 @@ export default function TikTokPatcherPage() {
       URL.revokeObjectURL(url);
       
       addLog('file saved successfully');
-      showToast('file saved! refreshing page...');
+      showToast('file saved successfully!');
       
+      // Close the modal and clear the file
       setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+        setNextStepsClosing(true);
+        setTimeout(() => {
+          setNextStepsOpen(false);
+          setNextStepsClosing(false);
+          setProcessedFile(null);
+          setSelectedFile(null);
+        }, 300);
+      }, 500);
     } catch (error: any) {
       addLog(`ERROR saving file: ${error?.message || String(error)}`);
       showToast('error saving file');
@@ -1449,22 +1467,6 @@ export default function TikTokPatcherPage() {
               <span className="material-symbols-outlined">auto_fix_high</span>
               patch
             </button>
-            
-            {processedFile && (
-              <button
-                onClick={handleSave}
-                className="m3-btn-filled"
-                style={{ 
-                  padding: '12px 48px',
-                  fontSize: '16px',
-                  borderRadius: 'var(--md-shape-full)',
-                  background: 'var(--md-secondary)',
-                }}
-              >
-                <span className="material-symbols-outlined">save</span>
-                save
-              </button>
-            )}
           </div>
 
           <div className="m3-card-elevated" style={{ marginTop: '24px' }}>
@@ -1472,11 +1474,51 @@ export default function TikTokPatcherPage() {
             
             <div style={{ display: 'grid', gap: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>speed</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>videocam</span>
                 <div>
-                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>no re-encoding happens</p>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>video stream remains untouched</p>
                   <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                    your video is remuxed (copied) without any quality loss. the original H.264/H.265 video stream is preserved exactly as-is.
+                    the original H.264/H.265 encoded frames are preserved exactly, without re-encoding. only the MP4 container structure is modified.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>graphic_eq</span>
+                <div>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>sample table inflation</p>
+                  <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
+                    the <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stsz</code> (sample size) table is expanded and dummy samples are added. this makes TikTok's parser work more reliably with the audio track.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>link</span>
+                <div>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>chunk offset recalculation</p>
+                  <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
+                    the <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stco</code> and <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stsc</code> tables are rebuilt to correctly map samples to their new byte offsets in the file.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>info</span>
+                <div>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>metadata injection</p>
+                  <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
+                    encoder info, comments, and artist metadata are written to the <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>ilst</code> (iTunes metadata) box for compatibility tracking.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>memory</span>
+                <div>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>trailing garbage injection</p>
+                  <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
+                    random padding bytes are appended after the media data. this prevents certain parsers from making assumptions about file size.
                   </p>
                 </div>
               </div>
@@ -1484,19 +1526,19 @@ export default function TikTokPatcherPage() {
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>check_circle</span>
                 <div>
-                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>supported formats</p>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>supported codecs</p>
                   <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                    H.264 (AVC) and H.265 (HEVC) video codecs. other codecs are not supported.
+                    H.264 (AVC) and H.265 (HEVC) video codecs. AAC audio. other codecs may cause issues.
                   </p>
                 </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>tune</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>code</span>
                 <div>
-                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>what gets patched</p>
+                  <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>implementation details</p>
                   <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                    metadata, audio track structure, and container layout are optimized for TikTok compatibility. video quality remains unchanged. for more info on how exactly this works, refer to <strong><a href="https://github.com/buwryme/tikutils" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>this repo</a></strong>.
+                    for the full technical breakdown, see the <strong><a href="https://github.com/buwryme/tikutils/blob/main/src/backend/patcher.py" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>source code</a></strong>.
                   </p>
                 </div>
               </div>
@@ -1524,6 +1566,92 @@ export default function TikTokPatcherPage() {
         onPrivacyClick={() => setPrivacyOpen(true)}
         onAcknowledgementsClick={() => setAcknowledgementsOpen(true)}
       />
+      
+      <Modal 
+        isOpen={nextStepsOpen}
+        isClosing={nextStepsClosing}
+        onClose={() => {
+          setNextStepsClosing(true);
+          setTimeout(() => {
+            setNextStepsOpen(false);
+            setNextStepsClosing(false);
+          }, 300);
+        }}
+        title="patched! what's next?"
+        actions={
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="m3-btn-outlined" onClick={() => {
+              setNextStepsClosing(true);
+              setTimeout(() => {
+                setNextStepsOpen(false);
+                setNextStepsClosing(false);
+                setProcessedFile(null);
+                setSelectedFile(null);
+              }, 300);
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+              cancel
+            </button>
+            <button className="m3-btn-filled" onClick={handleSave} style={{ marginLeft: 'auto' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+              save
+            </button>
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px', flexShrink: 0 }}>videocam</span>
+            <div style={{ flex: 1 }}>
+              <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>save the file</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px', flexShrink: 0 }}>upload_file</span>
+            <div style={{ flex: 1 }}>
+              <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>upload the saved file to <strong><a href="https://www.tiktok.com/tiktokstudio/upload" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>TikTok Studio</a></strong> <strong>via desktop</strong></p>
+              <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)', fontSize: '12px', fontWeight: '600', opacity: 0.7 }}>desktop uploading is required</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px', flexShrink: 0 }}>public</span>
+            <div style={{ flex: 1 }}>
+              <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>make sure your region matches</p>
+              <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>ensure your region matches the region you created your account with. otherwise, you have a higher risk of being shadowbanned</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px', flexShrink: 0 }}>edit</span>
+            <div style={{ flex: 1 }}>
+              <p className="m3-body-large" style={{ margin: 0, marginBottom: '8px' }}>you can only change the following:</p>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--md-on-surface-variant)', listStyleType: 'disc' }} className="m3-body-medium">
+                <li style={{ marginBottom: '4px' }}>thumbnail</li>
+                <li style={{ marginBottom: '4px' }}>description</li>
+                <li>privacy</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-error)', marginTop: '2px', flexShrink: 0 }}>block</span>
+            <div style={{ flex: 1 }}>
+              <p className="m3-body-large" style={{ margin: 0, marginBottom: '8px' }}>you should NOT:</p>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--md-on-surface-variant)', listStyleType: 'disc' }} className="m3-body-medium">
+                <li style={{ marginBottom: '4px' }}>edit the video right inside the interface</li>
+                <li style={{ marginBottom: '4px' }}>change/add audio</li>
+                <li>anything else that directly changes the video</li>
+              </ul>
+              <p className="m3-body-medium" style={{ margin: '8px 0 0 0', color: 'var(--md-on-surface-variant)' }}>otherwise tiktok will recompress it, since these steps re-encode it either way.</p>
+            </div>
+          </div>
+
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--md-on-surface-variant)', fontWeight: '600', opacity: 0.7 }}>posting on mobile is not supported.</p>
+        </div>
+      </Modal>
+      
       <Toast message={toast.message} isVisible={toast.visible} isClosing={toast.closing} toastKey={`${toast.id}-${toast.updateKey}`} />
     </>
   );
