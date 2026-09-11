@@ -1,0 +1,342 @@
+/* Android 13+ Material Design 3 Expressive Music Player */
+
+.music-player {
+  --player-width: 90%;
+  --player-max-width: 520px;
+  --player-height: 140px;
+  --album-diameter: 100px;
+}
+
+.music-player.fixed {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: 100%;
+}
+
+.music-player.inline {
+  position: relative;
+  width: 100%;
+}
+
+/* The card's own background: a dimmed, scaled-to-fill copy of the album
+   cover, living *inside* the card so it always exactly matches the card's
+   bounds and rounded corners. (Previously this was a separate, differently
+   sized layer positioned behind the card, and the card itself had an
+   almost-opaque surface fill on top of it — so the album art was barely
+   visible at all. Moving it inside and dropping that opaque fill is what
+   actually makes the card's background *be* the album cover.) */
+.card-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.card-background .blur-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Scaled-to-fill: always covers the card with no gaps, regardless of
+     the source image's aspect ratio. */
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.5); /* reduce brightness 50% */
+  transform: none;
+}
+
+.card-background .background-overlay {
+  position: absolute;
+  inset: 0;
+  /* Dim white 10% for all themes */
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 1;
+  transition: background 300ms ease;
+}
+
+/* Centering wrapper */
+.music-player-wrapper {
+  width: var(--player-width);
+  max-width: var(--player-max-width);
+  margin: 0 auto;
+  position: relative;
+  z-index: 3;
+}
+
+/* Main card - HORIZONTAL LAYOUT */
+.music-player-content {
+  position: relative;
+  /* No opaque surface fill here anymore — the card's visible background is
+     the .card-background layer (the dimmed, blurred album cover). An
+     opaque/near-opaque fill here would just paint over it. The backdrop-
+     filter blur was also removed: it blurs whatever is behind the whole
+     card in the page, which is unrelated now that the album art lives
+     inside the card as a normal layer. */
+  background: transparent;
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  height: var(--player-height);
+  border: 1px solid rgba(var(--md-outline-rgb), 0.12);
+  overflow: hidden; /* CRITICAL: Keeps ripple (and card-background) inside card */
+  animation: playerSlideUp 600ms var(--md-motion-spring-bouncy);
+}
+
+@keyframes playerSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Circular spinning album art */
+.album-art-circle {
+  position: relative; /* needed for z-index to lift it above .card-background */
+  z-index: 2;
+  width: var(--album-diameter);
+  height: var(--album-diameter);
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--md-primary-container);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  /* No transition by default: rotation is driven every animation frame
+     while playing, so a transition here would fight the per-frame value
+     and cause stutter (and, when the value wrapped, a visible glitch). */
+  transition: none;
+  transform-origin: center;
+}
+
+/* Only the pause -> snap-back-to-zero motion should be animated, and with
+   a bouncy M3 Expressive spring. */
+.album-art-circle.snapping {
+  transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.album-art-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Center content */
+.player-center-content {
+  position: relative; /* needed for z-index to lift it above .card-background */
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  height: 100%;
+  justify-content: center;
+}
+
+/* Song info */
+.song-title {
+  margin: 0;
+  color: var(--md-on-surface);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist-album {
+  margin: 0;
+  color: var(--md-on-surface-variant);
+  font-weight: 500;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Material Design 3 Expressive Track Switch Animation */
+@keyframes trackChangeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.track-change-animation {
+  animation: trackChangeIn 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Wavy Progress Bar */
+.wavy-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.progress-track {
+  position: relative;
+  width: 100%;
+  height: 32px;
+  cursor: pointer;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+}
+
+.wavy-svg {
+  width: 100%;
+  height: 32px;
+  display: block;
+  overflow: visible;
+}
+
+.wavy-fill-path {
+  /* Keep the played indicator visually joined to the track at its end. */
+  stroke-linecap: round;
+  /*
+   * NOTE: this used to have a `stroke-dasharray: 1000` + a CSS
+   * `stroke-dashoffset` keyframe animation to fake horizontal "flow".
+   * That dash pattern was a fixed 1000-unit loop totally decoupled from
+   * the actual (much shorter) rendered path length, so the visible dash
+   * window drifted independently of real playback progress — causing the
+   * wave to visually lag behind the seek thumb, and to glitch every time
+   * the fixed-duration animation looped (~every 20s). The flowing motion
+   * is now produced directly in the path's geometry (see `wavyPath` in
+   * MusicPlayer.tsx), driven by `currentTime`, so it can never drift out
+   * of sync with the thumb/progress again.
+   */
+}
+
+
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--md-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+  padding: 0 2px;
+}
+
+/* Play & Nav Controls Group */
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 5;
+  flex-shrink: 0;
+}
+
+/* Play Button */
+.control-btn {
+  position: relative; /* z-index requires a positioned element to take effect */
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(var(--md-primary-rgb), 0.3);
+  transition: all 200ms var(--md-motion-spring-bouncy);
+  z-index: 5;
+}
+
+.control-btn.secondary {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--md-outline-rgb), 0.15);
+  color: var(--md-on-surface);
+  box-shadow: none;
+}
+
+.control-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: scale(1.05);
+}
+
+.control-btn.secondary:active {
+  transform: scale(0.92);
+}
+
+.control-btn .material-symbols-outlined {
+  font-size: 32px;
+  transition: transform 200ms var(--md-motion-spring-bouncy);
+}
+
+.control-btn.secondary .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.control-btn:active {
+  transform: scale(0.9);
+}
+
+/* "(" Shaped Accent Ripple Wave */
+.android-ripple-wave {
+  position: absolute;
+  pointer-events: none;
+  width: 64px;
+  height: 130%;
+  background: var(--md-primary);
+  opacity: 0.3;
+  /* Left edge fully rounded (the "(" curve), right edge generously
+     rounded too so the whole shape reads as smooth and soft, while still
+     staying visibly more open/curved on the left to keep the "(" feel. */
+  border-radius: 100% 75% 75% 100% / 60% 60% 60% 60%;
+  filter: blur(14px);
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: right center;
+  z-index: 4;
+  animation: rippleLeftWave 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes rippleLeftWave {
+  0% {
+    transform: translate(0, -50%) scaleX(0);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(-600px, -50%) scaleX(2.5);
+    opacity: 0;
+  }
+}
+
+/* Responsive fixes */
+@media (max-width: 600px) {
+  .music-player {
+    --player-max-width: 95%;
+  }
+  .music-player-content {
+    height: 120px;
+    padding: 12px;
+  }
+  .album-art-circle {
+    width: 80px;
+    height: 80px;
+  }
+}
