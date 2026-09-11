@@ -5,7 +5,8 @@ import Footer from '../components/Footer';
 import MusicPlayer from '../components/MusicPlayer';
 import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
-import CookieDecorations from '../components/CookieDecorations';
+// import CookieDecorations from '../components/CookieDecorations'; //  Remove this import
+import CookieShape from '../components/CookieShape';
 import Toast from '../components/Toast';
 
 export default function HomePage() {
@@ -142,6 +143,26 @@ export default function HomePage() {
         overflow: 'hidden',
         zIndex: 0,
       }}>
+        {/* BIG SIDE COOKIE - Keep this one */}
+        <div style={{
+          position: 'absolute',
+          right: '-160px',
+          top: '40%',
+          transform: 'translateY(-50%)',
+          opacity: 0.12,
+          filter: 'saturate(0.25) brightness(1.15) contrast(0.95)',
+          animation: 'spin-clockwise 60s linear infinite',
+          transformOrigin: 'center',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}>
+          <CookieShape 
+            size="460px" 
+            fillColor="var(--md-primary-container)" 
+            strokeColor="var(--md-primary)" 
+          />
+        </div>
+
         <div className="blob-1" style={{
           position: 'absolute',
           top: '-20%',
@@ -310,7 +331,7 @@ export default function HomePage() {
           </p>
         </section>
 
-        <section className="animate-slide-up delay-200" style={{ marginBottom: '48px' }}>
+        <section className="animate-slide-up delay-200" style={{ marginBottom: '48px', position: 'relative', display: 'flex', alignItems: 'center' }}>
           <div className="m3-button-group" style={{ width: '100%', maxWidth: '480px' }}>
             <Link to="/tiktok-patcher" className="m3-button-group-item" style={{ flex: 1, textDecoration: 'none' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>music_note</span>
@@ -329,6 +350,7 @@ export default function HomePage() {
               <span>Socials</span>
             </button>
           </div>
+          {/* <CookieDecorations /> */} {/* Remove this line to remove the 3 cookies */}
         </section>
 
         <Footer 
@@ -336,9 +358,6 @@ export default function HomePage() {
           onAcknowledgementsClick={() => setAcknowledgementsOpen(true)}
         />
       </div>
-
-      {/* M3E Cookie Decorative Elements */}
-      <CookieDecorations />
 
 
 
@@ -518,8 +537,3 @@ function SocialsModal({ isOpen, isClosing, onClose }: { isOpen: boolean; isClosi
 
   return createPortal(modalContent, document.body);
 }
-
-
-
-
-

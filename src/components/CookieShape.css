@@ -3,7 +3,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  animation: cookie-spin 20s linear infinite;
 }
 
 .cookie-shape-background {
@@ -21,10 +20,18 @@
 }
 
 .cookie-svg path {
-  fill: var(--md-primary);
-  stroke: var(--md-on-primary);
-  stroke-width: 0.3;
-  opacity: 0.4;
+  fill: #ffffff;
+  stroke: none;
+  stroke-width: 0;
+  opacity: 1; /* Solid inside so we can control clean opacity on the parent container */
+  transition: fill 300ms ease;
+}
+
+/* Hide gear cluster on small viewports so they don't clip offscreen */
+@media (max-width: 900px) {
+  .cookie-gears-container {
+    display: none !important;
+  }
 }
 
 .cookie-shape-content {
@@ -37,10 +44,10 @@
   width: 70%;
   height: 70%;
   text-align: center;
-  color: var(--md-sys-color-on-primary-container, #21005D);
+  color: var(--md-on-primary-container, #3b0021);
 }
 
-@keyframes cookie-spin {
+@keyframes spin-clockwise {
   from {
     transform: rotate(0deg);
   }
@@ -49,14 +56,11 @@
   }
 }
 
-/* Hover effect - slow down rotation */
-.cookie-shape-container:hover {
-  animation-duration: 40s;
-}
-
-/* Responsive scaling */
-@media (max-width: 768px) {
-  .cookie-shape-container {
-    animation-duration: 30s;
+@keyframes spin-counter-clockwise {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
   }
 }

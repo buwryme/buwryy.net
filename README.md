@@ -72,5 +72,3 @@ for inquiries contact **hello@buwryy.net**
 <div align="center">
 
 **made with ♥ by [buwryme](https://github.com/buwryme)**
-
-</div>at your own risk.
