@@ -133,6 +133,10 @@
   
   html {
     scroll-behavior: smooth;
+    /* iOS inflates text in landscape, which blew the layout apart on
+       phones. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   
   body {
@@ -145,6 +149,9 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    /* long words (filenames, handles) break rather than pushing the whole
+       page into horizontal scroll. */
+    overflow-wrap: break-word;
     transition: background-color 0.3s var(--md-motion-spring-smooth), color 0.3s var(--md-motion-spring-smooth);
   }
   
@@ -326,16 +333,24 @@
     z-index: 9999;
     animation: fadeIn 0.2s var(--md-motion-spring-smooth);
     padding: 24px;
+    box-sizing: border-box;
+    /* a dialog taller than the viewport would otherwise put its actions
+       out of reach on a phone. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   
   .m3-dialog {
     background: var(--md-surface-container-high);
     border-radius: var(--md-shape-extra-large);
     padding: 24px;
-    min-width: 280px;
+    /* min() rather than a flat 280px, which with the overlay's padding
+       forced horizontal scrolling at 320px. */
+    min-width: min(280px, 100%);
     max-width: 560px;
     overflow: hidden;
     width: 100%;
+    box-sizing: border-box;
     box-shadow: var(--md-elevation-3);
     animation: dialogEnter 0.4s var(--md-motion-spring-bouncy);
   }
@@ -661,15 +676,15 @@
 @media (max-width: 768px) {
   .m3-button-group {
     flex-direction: column;
-    width: 90%;
-    max-width: 320px;
+    width: 100%;
+    max-width: 480px;
     margin: 0 auto;
     border-radius: var(--md-shape-extra-large);
   }
   
   .m3-button-group-item {
     width: 100%;
-    padding: 10px 16px;
+    padding: 12px 16px;
     font-size: 14px;
   }
 }
@@ -998,35 +1013,6 @@
   }
 }
 
-/* Wavy Progress Bar - Material Design 3 Expressive */
-.wavy-progress {
-  position: relative;
-  width: 100%;
-  height: 20px;
-  overflow: visible;
-}
-
-.wavy-progress svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.wavy-progress-path {
-  fill: none;
-  stroke: var(--md-primary);
-  stroke-width: 4;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.1s linear;
-}
-
-.wavy-progress-bg {
-  fill: none;
-  stroke: var(--md-surface-container-highest);
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
 /* Cookie Shapes - Material Design 3 Expressive Decorative Elements */
 .cookie-shape {
   position: absolute;
@@ -1071,6 +1057,120 @@
   width: 14px;
   height: 14px;
   animation-duration: 35s;
+}
+
+/* PAGE SHELL
+
+   replaces the per-page `width: 85%` + `padding: 24px` inline styles,
+   which cost ~107px of a 390px viewport to margins and overflowed the
+   header and footer on phones. */
+.page-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+/* wraps rather than compressing the text into a one-word-per-line
+   column when the icon and status chip leave too little room. */
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.page-title-row > .page-title-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-title-status {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .page-shell {
+    padding: 16px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+    padding: 8px 0;
+  }
+
+  /* !important because the theme toggle's padding is set inline per
+     page. 20px per side does not leave room for both buttons plus the
+     logo at 360px. */
+  .theme-toggle button {
+    padding: 8px 12px !important;
+  }
+
+  .theme-toggle button .material-symbols-outlined {
+    font-size: 18px !important;
+  }
+
+  .m3-title-large {
+    font-size: 19px;
+    line-height: 26px;
+  }
+
+  .m3-headline-large {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .m3-card,
+  .m3-card-elevated {
+    padding: 16px;
+  }
+
+  /* wrap rather than shrink the buttons into unreadable slivers. */
+  .m3-dialog-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .m3-dialog-title {
+    font-size: 20px;
+  }
+
+  /* the chip drops to its own line rather than crushing the title into a
+     two-character-wide column. the margin re-aligns it under the title
+     text, clearing the 64dp icon. */
+  .page-title-status {
+    flex-basis: 100%;
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 400px) {
+  .page-shell {
+    padding: 12px;
+  }
+
+  .theme-toggle button {
+    padding: 8px 10px !important;
+  }
 }
 
 /* Page wrapper - no animation */

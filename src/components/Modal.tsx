@@ -28,32 +28,13 @@ export default function Modal({ isOpen, isClosing = false, onClose, title, title
 
   const modalContent = (
     <div
-      className={isClosing ? 'modal-closing' : 'modal-opening'}
+      className={`m3-dialog-overlay ${isClosing ? 'modal-closing' : 'modal-opening'}`}
       onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0, 0, 0, 0.32)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-        padding: '24px',
-      }}
     >
       <div
-        className={isClosing ? 'dialog-closing' : 'dialog-opening'}
+        className={`m3-dialog ${isClosing ? 'dialog-closing' : 'dialog-opening'}`}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'var(--md-surface-container-high)',
-          borderRadius: 'var(--md-shape-extra-large)',
-          padding: '24px',
-          minWidth: '280px',
-          maxWidth: maxWidth,
-          width: '100%',
-          boxShadow: 'var(--md-elevation-3)',
-          overflow: 'hidden',
-        }}
+        style={{ maxWidth }}
       >
         <h2 className="m3-dialog-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {titleIcon}

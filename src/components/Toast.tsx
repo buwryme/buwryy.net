@@ -19,6 +19,8 @@ export default function Toast({ message, isVisible, isClosing, toastKey }: Toast
         justifyContent: 'center',
         zIndex: 2000,
         pointerEvents: 'none',
+        padding: '0 16px',
+        boxSizing: 'border-box',
       }}
     >
       <div
@@ -33,6 +35,9 @@ export default function Toast({ message, isVisible, isClosing, toastKey }: Toast
           fontFamily: "'Google Sans Flex', sans-serif",
           fontSize: '14px',
           fontWeight: 500,
+          textAlign: 'center',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
         }}
       >
         {message}

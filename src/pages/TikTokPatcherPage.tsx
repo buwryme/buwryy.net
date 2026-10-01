@@ -1110,14 +1110,8 @@ export default function TikTokPatcherPage() {
             opacity: isDark ? 'var(--blob-opacity-secondary)' : '0.25', filter: 'blur(35px)',
           }} />
         </div>
-        <div style={{
-          position: 'relative', zIndex: 1, maxWidth: '1200px', width: '85%', margin: '0 auto',
-          padding: '24px', flex: 1, display: 'flex', flexDirection: 'column',
-        }}>
-          <header style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '16px 0', marginBottom: '32px',
-          }}>
+        <div className="page-shell">
+          <header className="page-header">
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)' }}>arrow_back</span>
               <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>back</span>
@@ -1146,15 +1140,15 @@ export default function TikTokPatcherPage() {
           </header>
 
           <section style={{ marginBottom: '48px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+            <div className="page-title-row">
               <div style={{
                 width: '64px', height: '64px', borderRadius: 'var(--md-shape-large)',
                 background: 'var(--md-primary-container)', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', overflow: 'hidden',
+                justifyContent: 'center', overflow: 'hidden', flexShrink: 0,
               }}>
                 <img src="/assets/tikutils.svg" alt="TikTok" style={{ width: '64px', height: '64px' }} />
               </div>
-              <div style={{ flex: 1 }}>
+              <div className="page-title-text">
                 <h1 className="m3-headline-large" style={{ color: 'var(--md-on-surface)', margin: 0 }}>tiktok patcher</h1>
                 <p className="m3-body-medium" style={{ color: 'var(--md-on-surface-variant)', margin: 0 }}>
                   patch videos for lossless tiktok uploads
@@ -1165,12 +1159,12 @@ export default function TikTokPatcherPage() {
                 </p>
               </div>
               {!loaded ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="page-title-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div className="m3-circular-progress" style={{ width: '20px', height: '20px' }} />
                   <span className="m3-body-medium">loading ffmpeg...</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="page-title-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '20px', color: 'var(--md-primary)' }}>check_circle</span>
                   <span className="m3-body-medium">ready to patch</span>
                 </div>

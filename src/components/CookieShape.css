@@ -27,13 +27,6 @@
   transition: fill 300ms ease;
 }
 
-/* Hide gear cluster on small viewports so they don't clip offscreen */
-@media (max-width: 900px) {
-  .cookie-gears-container {
-    display: none !important;
-  }
-}
-
 .cookie-shape-content {
   position: relative;
   z-index: 2;
@@ -53,14 +46,5 @@
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes spin-counter-clockwise {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
   }
 }

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import WavySlider from './WavySlider';
 import './MusicPlayer.css';
 
 interface MusicPlayerProps {
@@ -79,20 +80,22 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const isDraggingRef = useRef(false);
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const isScrubbingRef = useRef(false);
   useEffect(() => {
-    isDraggingRef.current = isDragging;
-  }, [isDragging]);
-  
-  // Track continuous rotation offset so it plays from where it was paused
+    isScrubbingRef.current = isScrubbing;
+  }, [isScrubbing]);
+
+  // free-running accumulator, never wrapped with % 360 — wrapping made
+  // the settle transition animate the long way round every ~20s. it also
+  // does not rewind on pause; the disc just stops where it is, which is
+  // what android does and avoids the reverse-spin the old snap-back
+  // produced.
   const rotationOffsetRef = useRef(0);
   const [rotation, setRotation] = useState(0);
-  
+
   const audioRef = useRef<HTMLAudioElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const currentSong = ALBUM_SONGS[currentSongIndex];
   const albumArtUrl = 'https://portalpopline.com.br/wp-content/uploads/2026/04/ariana-grande-petal.jpg';
@@ -123,7 +126,7 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
     if (!audio) return;
 
     // Nothing should keep advancing the visual position while paused.
-    if (!isPlaying && !isDragging) return;
+    if (!isPlaying && !isScrubbing) return;
 
     let lastTime = performance.now();
 
@@ -131,22 +134,17 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
       const delta = (now - lastTime) / 1000;
       lastTime = now;
 
-      if (!isDragging) {
+      if (!isScrubbingRef.current) {
         setCurrentTime(audio.currentTime);
       }
 
-      // Continuous rotation accumulation while playing. Dragging only updates
-      // the seek thumb; it must not advance the rotation.
-      // NOTE: intentionally NOT wrapped with `% 360` — wrapping the value
-      // caused a visible reverse-spin glitch every ~20s, because the
-      // snap-back transition on .album-art-circle would animate the sudden
-      // jump from ~360deg back to 0deg the long way around.
+      // scrubbing moves the seek thumb only, never the rotation.
       if (isPlaying) {
-        rotationOffsetRef.current = rotationOffsetRef.current + delta * 18;
+        rotationOffsetRef.current += delta * 18;
         setRotation(rotationOffsetRef.current);
       }
 
-      if (isPlaying || isDragging) {
+      if (isPlaying || isScrubbing) {
         animationFrameRef.current = requestAnimationFrame(animate);
       }
     };
@@ -155,15 +153,7 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [isPlaying, isDragging]);
-
-  // Handle snap back of circle rotation to original state ONLY when paused
-  useEffect(() => {
-    if (!isPlaying) {
-      setRotation(0);
-      rotationOffsetRef.current = 0; // Starts from scratch next play
-    }
-  }, [isPlaying]);
+  }, [isPlaying, isScrubbing]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -184,7 +174,7 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
     // truth. The rAF loop still exists for smooth interpolation while the
     // tab is visible.
     const handleTimeUpdate = () => {
-      if (!isDraggingRef.current) {
+      if (!isScrubbingRef.current) {
         setCurrentTime(audio.currentTime);
       }
     };
@@ -200,260 +190,126 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
     };
   }, []);
 
-  const togglePlay = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    createAccentRipple(e.currentTarget);
-
     if (isPlaying) {
       audio.pause();
+      setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }
-    setIsPlaying(!isPlaying);
   };
 
-  const playPrevious = (e: React.MouseEvent<HTMLButtonElement>) => {
-    createAccentRipple(e.currentTarget);
+  const playPrevious = () => {
     setCurrentSongIndex((prevIndex) =>
       prevIndex === 0 ? ALBUM_SONGS.length - 1 : prevIndex - 1
     );
   };
 
-  const playNext = (e: React.MouseEvent<HTMLButtonElement>) => {
-    createAccentRipple(e.currentTarget);
+  const playNext = () => {
     setCurrentSongIndex((prevIndex) => (prevIndex + 1) % ALBUM_SONGS.length);
   };
 
-  const createAccentRipple = (button: HTMLButtonElement) => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const buttonRect = button.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    
-    const x = buttonRect.left - containerRect.left + buttonRect.width / 2;
-    const y = buttonRect.top - containerRect.top + buttonRect.height / 2;
-
-    const ripple = document.createElement('div');
-    ripple.className = 'android-ripple-wave';
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-
-    container.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 1000);
-  };
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    const container = progressRef.current;
-    if (!audio || !container) return;
-
-    const rect = container.getBoundingClientRect();
-    const percentage = (e.clientX - rect.left) / rect.width;
-    const newTime = Math.max(0, Math.min(percentage * duration, duration));
-    
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
-  const handleProgressDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-
-    const updatePosition = (moveEvent: PointerEvent) => {
-      const container = progressRef.current;
-      const audio = audioRef.current;
-      if (!audio || !container) return;
-
-      const rect = container.getBoundingClientRect();
-      const percentage = (moveEvent.clientX - rect.left) / rect.width;
-      const newTime = Math.max(0, Math.min(percentage * duration, duration));
-      setCurrentTime(newTime);
-    };
-
-    const handlePointerUp = (upEvent: PointerEvent) => {
-      const container = progressRef.current;
-      const audio = audioRef.current;
-      if (!audio || !container) return;
-
-      const rect = container.getBoundingClientRect();
-      const percentage = (upEvent.clientX - rect.left) / rect.width;
-      const newTime = Math.max(0, Math.min(percentage * duration, duration));
-      
-      audio.currentTime = newTime;
-      setCurrentTime(newTime);
-      setIsDragging(false);
-
-      document.removeEventListener('pointermove', updatePosition);
-      document.removeEventListener('pointerup', handlePointerUp);
-    };
-
-    document.addEventListener('pointermove', updatePosition);
-    document.addEventListener('pointerup', handlePointerUp);
-  };
-
   const formatTime = (time: number) => {
-    if (isNaN(time)) return '0:00';
+    if (!isFinite(time) || isNaN(time)) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const progress = duration > 0 ? currentTime / duration : 0;
 
-  // Wavy path for the progress bar - smooth sine wave that fades to unplayed portion.
-  //
-  // The wave's "flow" is driven by `currentTime` itself (not a separate
-  // CSS clock/stroke-dashoffset animation). Previously the flowing motion
-  // was a `stroke-dashoffset` CSS keyframe on a fixed `stroke-dasharray`
-  // that was totally decoupled from the actual (much shorter) path length.
-  // That produced a sliding "dash window" independent of real progress —
-  // which is why the wave visually lagged behind the seek thumb, and
-  // glitched every time the fixed 20s CSS animation looped. Tying the
-  // phase to `currentTime` guarantees the wave can never drift out of sync
-  // with the thumb/progress, since both derive from the same value.
-  const wavyPath = useMemo(() => {
-    const endX = progressPercentage * 10; // 0-1000 scale
-    const baseWavelength = 80; // 2x frequency of the previous 160 wavelength (more wavy!)
-    const flowSpeed = 60; // px of phase shift per second of playback
-    const phase = currentTime * flowSpeed;
-    
-    let path = `M 0 30`;
-    for (let x = 0; x <= endX; x += 2) {
-      // Fade out wave amplitude near the end of the played portion to join seamlessly with unplayed section
-      const distanceToEnd = endX - x;
-      const fadeFactor = Math.min(1, distanceToEnd / 60); // Fade range of 60 units (6% of full bar width)
-      const amplitude = (isPlaying ? 5 : 0) * fadeFactor;
-      
-      const y = 30 + Math.sin((x - phase) / baseWavelength * 2 * Math.PI) * amplitude;
-      path += ` L ${x} ${y}`;
-    }
-    return path;
-  }, [progressPercentage, currentTime, isPlaying]);
+  const seekTo = (fraction: number) => {
+    const audio = audioRef.current;
+    if (!audio || !isFinite(duration) || duration <= 0) return;
+    const next = Math.max(0, Math.min(fraction, 1)) * duration;
+    audio.currentTime = next;
+    setCurrentTime(next);
+  };
 
   return (
     <div className={`music-player ${inline ? 'inline' : 'fixed'}`}>
       <audio ref={audioRef} src={currentSong.previewUrl} preload="metadata" crossOrigin="anonymous" />
-      
-      {/* Centered wrapper */}
+
       <div className="music-player-wrapper">
-        {/* Main card. The blurred/dimmed album cover lives *inside* this
-            card (instead of as a separate, differently-sized layer behind
-            it) so it exactly matches the card's bounds/corners and is
-            actually visible as the card's background, instead of being
-            hidden behind an almost-opaque surface fill. */}
-        <div ref={containerRef} className="music-player-content">
+        <div className="music-player-content">
+          {/* alt="" because the adjacent .album-art-circle img already
+              names the artwork; this one is decorative. */}
           <div className="card-background">
             <img
               src={albumArtUrl}
-              alt="album background"
+              alt=""
+              aria-hidden="true"
               className="blur-bg"
               onError={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, var(--md-primary-container) 0%, var(--md-tertiary-container) 100%)';
+                e.currentTarget.style.display = 'none';
               }}
             />
-            <div className="background-overlay"></div>
+            <div className="background-overlay" />
           </div>
 
-          {/* Circular spinning album art */}
-          <div
-            className={`album-art-circle ${!isPlaying ? 'snapping' : ''}`}
-            style={{ transform: `rotateZ(${rotation}deg)` }}
-          >
-            <img
-              src={albumArtUrl}
-              alt="petal album cover"
-              onError={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, var(--md-primary-container) 0%, var(--md-tertiary-container) 100%)';
-              }}
-            />
-          </div>
-
-          {/* Center: Info & Wavy Progress */}
-          <div className="player-center-content">
-            <div key={currentSongIndex} className="song-info track-change-animation">
-              <h2 className="song-title">{currentSong.title}</h2>
-              <p className="artist-album">{currentSong.artist}</p>
-            </div>
-
-            <div className="wavy-progress-container">
-              <div
-                ref={progressRef}
-                className="progress-track"
-                onClick={handleProgressClick}
-                onPointerDown={handleProgressDrag}
-              >
-                <svg 
-                  className="wavy-svg"
-                  viewBox="0 0 1000 60"
-                  preserveAspectRatio="none"
-                >
-                  {/* Unplayed - Solid track */}
-                  <line
-                    x1={progressPercentage * 10}
-                    y1="30"
-                    x2="1000"
-                    y2="30"
-                    stroke="var(--md-surface-variant)"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                  />
-                  {/* Played - Wavy track */}
-                  <path
-                    d={wavyPath}
-                    className="wavy-fill-path"
-                    stroke="var(--md-primary)"
-                    strokeWidth="8"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                  {/* Rounded rectangular vertical seek thumb */}
-                  <g transform={`translate(${progressPercentage * 10}, 30)`}>
-                    <rect
-                      x="-8"
-                      y="-18"
-                      width="16"
-                      height="36"
-                      rx="2.5"
-                      fill="white"
-                      stroke="rgba(0, 0, 0, 0.16)"
-                      strokeWidth="1.5"
-                    />
-                  </g>
-                </svg>
-              </div>
-              
-              <div className="time-display">
-                <span className="current-time">{formatTime(currentTime)}</span>
-                <span className="duration-time">{formatTime(duration)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Play & Nav Controls Group */}
-          <div className="controls-group">
-            <button
-              onClick={playPrevious}
-              className="control-btn secondary"
-              aria-label="Previous Song"
+          <div className="player-top">
+            <div
+              className="album-art-circle"
+              style={{ transform: `rotateZ(${rotation}deg)` }}
             >
+              <img
+                src={albumArtUrl}
+                alt={`${currentSong.title} album cover`}
+                onError={(e) => {
+                  e.currentTarget.style.background =
+                    'linear-gradient(135deg, var(--md-primary-container) 0%, var(--md-tertiary-container) 100%)';
+                }}
+              />
+            </div>
+
+            <div className="player-meta">
+              <div key={currentSongIndex} className="song-info track-change-animation">
+                <h2 className="song-title">{currentSong.title}</h2>
+                <p className="artist-album">{currentSong.artist}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="wavy-progress-container">
+            <WavySlider
+              value={progress}
+              onChange={seekTo}
+              active={isPlaying}
+              disabled={!isFinite(duration) || duration <= 0}
+              ariaLabel="Seek"
+              describeValue={(fraction) =>
+                `${formatTime(fraction * duration)} of ${formatTime(duration)}`
+              }
+              onScrubStart={() => setIsScrubbing(true)}
+              onScrubEnd={() => setIsScrubbing(false)}
+            />
+
+            <div className="time-display">
+              <span className="current-time">{formatTime(currentTime)}</span>
+              <span className="duration-time">{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          <div className="controls-group">
+            <button onClick={playPrevious} className="control-btn" aria-label="Previous track">
               <span className="material-symbols-outlined">skip_previous</span>
             </button>
+
             <button
               onClick={togglePlay}
-              className={`control-btn ${isPlaying ? 'playing' : ''}`}
+              className={`control-btn primary ${isPlaying ? 'is-playing' : ''}`}
               aria-label={isPlaying ? 'Pause' : 'Play'}
+              aria-pressed={isPlaying}
             >
               <span className="material-symbols-outlined">
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </button>
-            <button
-              onClick={playNext}
-              className="control-btn secondary"
-              aria-label="Next Song"
-            >
+
+            <button onClick={playNext} className="control-btn" aria-label="Next track">
               <span className="material-symbols-outlined">skip_next</span>
             </button>
           </div>

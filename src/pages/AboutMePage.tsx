@@ -82,24 +82,8 @@ export default function AboutMePage() {
         }} />
       </div>
 
-      <div style={{
-        position: 'relative',
-        zIndex: 1,
-        maxWidth: '1200px',
-        width: '85%',
-        margin: '0 auto',
-        padding: '24px',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <header style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 0',
-          marginBottom: '32px',
-        }}>
+      <div className="page-shell">
+        <header className="page-header">
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)' }}>arrow_back</span>
             <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
@@ -152,7 +136,7 @@ export default function AboutMePage() {
         </header>
 
         <section style={{ marginBottom: '48px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+          <div className="page-title-row">
             <div style={{
               width: '64px',
               height: '64px',
@@ -161,10 +145,11 @@ export default function AboutMePage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--md-on-secondary-container)' }}>person</span>
             </div>
-            <div>
+            <div className="page-title-text">
               <h1 className="m3-headline-large" style={{ color: 'var(--md-on-surface)', margin: 0 }}>
                 about me
               </h1>
@@ -322,7 +307,7 @@ export default function AboutMePage() {
             {/* Projects Section */}
             <div style={{ marginTop: '24px' }}>
               <h3 className="m3-title-medium" style={{ marginBottom: '16px' }}>projects</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '12px' }}>
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
@@ -471,10 +456,12 @@ export default function AboutMePage() {
         <p style={{ marginBottom: '16px' }}>{projectModal?.description}</p>
       </Modal>
 
-      <Footer 
-        onPrivacyClick={() => setPrivacyOpen(true)}
-        onAcknowledgementsClick={() => setAcknowledgementsOpen(true)}
-      />
+      <div className="page-shell" style={{ flex: '0 0 auto', paddingTop: 0 }}>
+        <Footer 
+          onPrivacyClick={() => setPrivacyOpen(true)}
+          onAcknowledgementsClick={() => setAcknowledgementsOpen(true)}
+        />
+      </div>
     </div>
   );
 }

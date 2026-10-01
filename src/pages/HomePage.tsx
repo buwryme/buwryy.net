@@ -5,7 +5,6 @@ import Footer from '../components/Footer';
 import MusicPlayer from '../components/MusicPlayer';
 import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
-// import CookieDecorations from '../components/CookieDecorations'; //  Remove this import
 import CookieShape from '../components/CookieShape';
 import Toast from '../components/Toast';
 
@@ -143,7 +142,6 @@ export default function HomePage() {
         overflow: 'hidden',
         zIndex: 0,
       }}>
-        {/* BIG SIDE COOKIE - Keep this one */}
         <div style={{
           position: 'absolute',
           right: '-160px',
@@ -195,24 +193,8 @@ export default function HomePage() {
         }} />
       </div>
 
-      <div style={{
-        position: 'relative',
-        zIndex: 1,
-        maxWidth: '1200px',
-        width: '85%',
-        margin: '0 auto',
-        padding: '24px',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <header className="animate-fade-in" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 0',
-          marginBottom: '32px',
-        }}>
+      <div className="page-shell">
+        <header className="page-header animate-fade-in">
           <Link to="/" className="header-logo-link" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <Logo />
             <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
@@ -289,13 +271,16 @@ export default function HomePage() {
           
           <h1 className="m3-display-large m3-emphasized" style={{
             color: 'var(--md-on-background)',
-            marginBottom: '16px',
-            fontSize: 'clamp(36px, 8vw, 57px)',
-            minHeight: '1.2em',
+            margin: '0 0 16px 0',
+            /* 36px overflowed the line at 390px, wrapping the "!" onto its
+               own row under a phantom blank line from the old 1.2em
+               min-height. */
+            fontSize: 'clamp(30px, 8vw, 57px)',
+            lineHeight: '1.15',
           }}>
             {typedText}
             {showBuwryy && (
-              <span>
+              <span style={{ whiteSpace: 'nowrap' }}>
                 {'buwryy'.split('').map((char, charIndex) => (
                   <span
                     key={charIndex}
@@ -350,7 +335,6 @@ export default function HomePage() {
               <span>Socials</span>
             </button>
           </div>
-          {/* <CookieDecorations /> */} {/* Remove this line to remove the 3 cookies */}
         </section>
 
         <Footer 
@@ -485,16 +469,7 @@ function SocialsModal({ isOpen, isClosing, onClose }: { isOpen: boolean; isClosi
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className={`m3-dialog-overlay ${isClosing ? 'modal-closing' : 'modal-opening'}`} onClick={onClose} style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0, 0, 0, 0.32)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999,
-      padding: '24px',
-    }}>
+    <div className={`m3-dialog-overlay ${isClosing ? 'modal-closing' : 'modal-opening'}`} onClick={onClose}>
       <div className={`m3-dialog ${isClosing ? 'dialog-closing' : 'dialog-opening'}`} onClick={(e) => e.stopPropagation()}>
         <h2 className="m3-dialog-title">find me</h2>
         <div className="m3-dialog-content">

@@ -110,24 +110,8 @@ export default function ProjectsPage() {
         }} />
       </div>
 
-      <div style={{
-        position: 'relative',
-        zIndex: 1,
-        maxWidth: '1200px',
-        width: '85%',
-        margin: '0 auto',
-        padding: '24px',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <header style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 0',
-          marginBottom: '32px',
-        }}>
+      <div className="page-shell">
+        <header className="page-header">
           <Link to="/about-me" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)' }}>arrow_back</span>
             <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
@@ -180,7 +164,7 @@ export default function ProjectsPage() {
         </header>
 
         <section style={{ marginBottom: '48px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+          <div className="page-title-row">
             <div style={{
               width: '64px',
               height: '64px',
@@ -189,10 +173,11 @@ export default function ProjectsPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--md-on-primary-container)' }}>build</span>
             </div>
-            <div>
+            <div className="page-title-text">
               <h1 className="m3-headline-large" style={{ color: 'var(--md-on-surface)', margin: 0 }}>
                 projects
               </h1>

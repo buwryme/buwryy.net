@@ -19,7 +19,7 @@ export default function Footer({ onPrivacyClick, onAcknowledgementsClick }: {
         © {new Date().getFullYear()} buwryy.net
       </span>
       
-      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button
           onClick={onPrivacyClick}
           style={{

@@ -1,0 +1,67 @@
+/* geometry lives in WavySlider.tsx next to the token values it mirrors.
+   this file owns only interaction affordances. */
+
+.wavy-slider {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+  /* let the browser not treat a horizontal drag as a scroll. */
+  touch-action: none;
+  outline: none;
+  border-radius: 4px;
+}
+
+/* grows the hit area to the 48dp minimum without adding layout height to
+   the 44dp row. */
+.wavy-slider::after {
+  content: '';
+  position: absolute;
+  inset: -2px 0;
+}
+
+.wavy-slider.is-disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.wavy-slider-svg {
+  display: block;
+  /* the handle and the wave both overhang the 4dp track's bounds. */
+  overflow: visible;
+}
+
+.wavy-slider:focus-visible {
+  box-shadow: 0 0 0 2px var(--md-primary);
+  transition: box-shadow 150ms cubic-bezier(0.31, 0.94, 0.34, 1);
+}
+
+/* colour only, and only so a disabled-to-enabled swap crossfades. the
+   geometry is rewritten every frame and must not be transitioned. */
+.wavy-slider-inactive,
+.wavy-slider-active,
+.wavy-slider-handle {
+  transition: fill 150ms cubic-bezier(0.31, 0.94, 0.34, 1),
+    stroke 150ms cubic-bezier(0.31, 0.94, 0.34, 1);
+}
+
+/* disabled alphas are the token values, not a blanket opacity. */
+.wavy-slider.is-disabled .wavy-slider-inactive {
+  fill: var(--md-on-surface);
+  opacity: 0.12;
+}
+
+.wavy-slider.is-disabled .wavy-slider-active,
+.wavy-slider.is-disabled .wavy-slider-handle {
+  stroke: var(--md-on-surface);
+  fill: var(--md-on-surface);
+  opacity: 0.38;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wavy-slider,
+  .wavy-slider-inactive,
+  .wavy-slider-active,
+  .wavy-slider-handle {
+    transition: none;
+  }
+}
