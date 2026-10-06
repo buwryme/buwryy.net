@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL, fetchFile } from '@ffmpeg/util';
 import Footer from '../components/Footer';
@@ -34,7 +34,10 @@ const DEFAULT_CONFIG: PatchConfig = {
   trailingBytes: 184100,
 };
 
+const PATCHER_STATUS_URL = 'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/49d767df25ce485a3e8b25128e372a5f798b170a/tiktok-patcher-status';
+
 export default function TikTokPatcherPage() {
+  const navigate = useNavigate();
   const [ffmpeg, setFfmpeg] = useState<any>(null);
   const [loaded, setLoaded] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -66,6 +69,8 @@ export default function TikTokPatcherPage() {
   const [acknowledgementsClosing, setAcknowledgementsClosing] = useState(false);
   const [nextStepsOpen, setNextStepsOpen] = useState(false);
   const [nextStepsClosing, setNextStepsClosing] = useState(false);
+  const [patchedOutOpen, setPatchedOutOpen] = useState(false);
+  const [patchedOutClosing, setPatchedOutClosing] = useState(false);
   const toastTimeoutRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +93,24 @@ export default function TikTokPatcherPage() {
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkPatcherStatus = async () => {
+      try {
+        const res = await fetch(PATCHER_STATUS_URL, { cache: 'no-store' });
+        if (!res.ok) return;
+        const text = (await res.text()).trim();
+        if (!cancelled && text === '0') setPatchedOutOpen(true);
+      } catch {
+        // fail open: if the status endpoint can't be reached, keep the patcher usable
+      }
+    };
+
+    checkPatcherStatus();
+    return () => { cancelled = true; };
   }, []);
 
   const ffmpegLoadedRef = useRef(false);
@@ -177,6 +200,15 @@ export default function TikTokPatcherPage() {
   const toggleTheme = (theme: 'light' | 'dark') => {
     setIsDark(theme === 'dark');
     document.documentElement.setAttribute('data-theme', theme);
+  };
+
+  const handlePatchedOutClose = () => {
+    setPatchedOutClosing(true);
+    setTimeout(() => {
+      setPatchedOutOpen(false);
+      setPatchedOutClosing(false);
+      navigate('/');
+    }, 300);
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1405,6 +1437,25 @@ export default function TikTokPatcherPage() {
           </div>
           <p style={{ margin: 0, fontSize: '12px', color: 'var(--md-on-surface-variant)', fontWeight: '600', opacity: 0.7 }}>posting on mobile is not supported.</p>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={patchedOutOpen}
+        isClosing={patchedOutClosing}
+        onClose={handlePatchedOutClose}
+        title="the method no longer works; it has been patched by TikTok!"
+        titleIcon={
+          <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--md-error)' }}>warning</span>
+        }
+        actions={
+          <button className="m3-btn-filled" onClick={handlePatchedOutClose}>
+            ok, got it!
+          </button>
+        }
+      >
+        <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
+          recently, tiktok pushed an update that blocks the current functionality of the video structure patcher. don't worry; we are working on a fix. this is temporary. for now, check out the rest of the website! :P
+        </p>
       </Modal>
 
       <Toast message={toast.message} isVisible={toast.visible} isClosing={toast.closing} toastKey={`${toast.id}-${toast.updateKey}`} />
