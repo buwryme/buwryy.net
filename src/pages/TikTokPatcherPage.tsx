@@ -34,7 +34,7 @@ const DEFAULT_CONFIG: PatchConfig = {
   trailingBytes: 184100,
 };
 
-const PATCHER_STATUS_URL = 'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/49d767df25ce485a3e8b25128e372a5f798b170a/tiktok-patcher-status';
+const PATCHER_STATUS_URL = 'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/tiktok-patcher-status';
 
 export default function TikTokPatcherPage() {
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ export default function TikTokPatcherPage() {
 
     const checkPatcherStatus = async () => {
       try {
-        const res = await fetch(PATCHER_STATUS_URL, { cache: 'no-store' });
+        const res = await fetch(`${PATCHER_STATUS_URL}?t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) return;
         const text = (await res.text()).trim();
         if (!cancelled && text === '0') setPatchedOutOpen(true);

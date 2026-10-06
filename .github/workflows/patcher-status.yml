@@ -2,7 +2,7 @@ name: Patcher Status
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -21,8 +21,8 @@ jobs:
       - name: Refresh status badge
         run: |
           set -euo pipefail
-          url='https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/49d767df25ce485a3e8b25128e372a5f798b170a/tiktok-patcher-status'
-          value="$(curl -fsSL "$url" | tr -d '[:space:]')"
+          url='https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/tiktok-patcher-status'
+          value="$(curl -fsSL "$url?t=$(date +%s)" | tr -d '[:space:]')"
           case "$value" in
             1) message='working!'; color='green' ;;
             0) message='patched out...'; color='red' ;;
