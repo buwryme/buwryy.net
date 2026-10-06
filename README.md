@@ -7,6 +7,7 @@
 personal site & client-side tiktok patcher built with react & material design 3 expressive.
 
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](LICENSE)
+[![Patcher Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbuwryme%2Fbuwryy.net%2Fmain%2F.github%2Fpatcher-status.json&style=flat-square)](https://github.com/buwryme/buwryy.net)
 
 </div>
 
@@ -65,7 +66,7 @@ push to github and import directly into **vercel** or **netlify**. for manual ho
 
 ---
 
-> licensed under gplv3. use patcher responsibly. patcher works as of september 2026
+> licensed under gplv3. use patcher responsibly.
 
 for inquiries contact **hello@buwryy.net**
 
