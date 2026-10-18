@@ -27,7 +27,7 @@ const projects: Project[] = [
   },
   {
     name: 'vkintox',
-    url: 'https://github.com/buwryme/vkintox',
+    url: 'https://github.com/VKIntox/VKIntox',
     description: 'roblox shaders like reshade for sober, an android runtime for linux!',
     icon: 'sports_esports',
   },
