@@ -510,6 +510,184 @@ function patchBtrtInStsd(stsd: Uint8Array, bitrate: number): Uint8Array {
   return output;
 }
 
+function readDescriptorLength(data: Uint8Array, offset: number): [number, number] {
+  let value = 0;
+  let cursor = offset;
+  while (cursor < data.length) {
+    const byte = data[cursor];
+    cursor += 1;
+    value = (value << 7) | (byte & 0x7f);
+    if ((byte & 0x80) === 0) break;
+  }
+  return [value, cursor];
+}
+
+function patchAudioStsd(stsd: Uint8Array, bitrate: number): Uint8Array {
+  const output = new Uint8Array(stsd);
+
+  let search = 0;
+  while (true) {
+    const index = output.indexOf(0x65, search); // 'e'
+    if (index === -1) break;
+    if (
+      output[index + 1] === 0x73 &&
+      output[index + 2] === 0x64 &&
+      output[index + 3] === 0x73 &&
+      index >= 4
+    ) {
+      const start = index - 4;
+      const size = readU32(output, start);
+      if (size >= 30) {
+        let cursor = start + 12;
+        if (cursor < start + size && output[cursor] === 0x03) {
+          cursor += 1;
+          [, cursor] = readDescriptorLength(output, cursor);
+          cursor += 3; // ES_ID (2) + flags (1)
+          if (cursor < start + size && output[cursor] === 0x04) {
+            cursor += 1;
+            [, cursor] = readDescriptorLength(output, cursor);
+            const maxOffset = cursor + 5;
+            const avgOffset = maxOffset + 4;
+            if (avgOffset + 4 <= start + size) {
+              writeU32(output, maxOffset, bitrate);
+              writeU32(output, avgOffset, bitrate);
+            }
+          }
+        }
+      }
+    }
+    search = index + 4;
+  }
+
+  search = 0;
+  while (true) {
+    const index = output.indexOf(0x62, search); // 'b'
+    if (index === -1) break;
+    if (
+      output[index + 1] === 0x74 &&
+      output[index + 2] === 0x72 &&
+      output[index + 3] === 0x74 &&
+      index >= 4 &&
+      readU32(output, index - 4) === 20
+    ) {
+      const start = index - 4;
+      writeU32(output, start + 12, bitrate);
+      writeU32(output, start + 16, bitrate);
+    }
+    search = index + 4;
+  }
+  return output;
+}
+
+function patchTkhdDuration(data: Uint8Array, tkhd: Mp4Box, duration: number): Uint8Array {
+  const payload = new Uint8Array(data.subarray(tkhd.payloadStart, tkhd.end));
+  if (payload[0] === 1) writeU64(payload, 28, duration);
+  else writeU32(payload, 20, duration);
+  return buildBox('tkhd', payload);
+}
+
+function buildSttsEntries(entries: SttsEntry[]): Uint8Array {
+  const payload = new Uint8Array(8 + entries.length * 8);
+  writeU32(payload, 4, entries.length);
+  entries.forEach((entry, index) => {
+    const offset = 8 + index * 8;
+    writeU32(payload, offset, entry.count);
+    writeU32(payload, offset + 4, entry.delta);
+  });
+  return buildBox('stts', payload);
+}
+
+interface AudioStats {
+  targetDuration: number;
+  tkhdDuration: number;
+  stts: SttsEntry[];
+  bitrate: number;
+}
+
+function mvhdTimescale(data: Uint8Array, moov: Mp4Box): number {
+  for (const box of parseBoxes(data, moov.payloadStart, moov.end)) {
+    if (box.type !== 'mvhd') continue;
+    return data[box.payloadStart] === 1
+      ? readU32(data, box.payloadStart + 20)
+      : readU32(data, box.payloadStart + 12);
+  }
+  return 0;
+}
+
+function readAudioStats(
+  data: Uint8Array,
+  trak: Mp4Box,
+  movieTimescale: number,
+): AudioStats | null {
+  if (!movieTimescale) return null;
+  let segmentDuration = 0;
+  let mediaTime = 0;
+  let timescale = 0;
+  let stts: SttsEntry[] = [];
+  let sizes: number[] = [];
+
+  for (const box of parseBoxes(data, trak.payloadStart, trak.end)) {
+    if (box.type === 'edts') {
+      for (const child of parseBoxes(data, box.payloadStart, box.end)) {
+        if (child.type !== 'elst') continue;
+        const payload = child.payloadStart;
+        const version = data[payload];
+        const count = readU32(data, payload + 4);
+        if (count > 0) {
+          if (version === 1) {
+            segmentDuration = readU64(data, payload + 8);
+            mediaTime = readU64(data, payload + 16);
+          } else {
+            segmentDuration = readU32(data, payload + 8);
+            mediaTime = readU32(data, payload + 12);
+          }
+        }
+      }
+    } else if (box.type === 'mdia') {
+      for (const child of parseBoxes(data, box.payloadStart, box.end)) {
+        if (child.type === 'mdhd') {
+          timescale = mdhdTimescale(data, child);
+        } else if (child.type === 'minf') {
+          for (const minf of parseBoxes(data, child.payloadStart, child.end)) {
+            if (minf.type !== 'stbl') continue;
+            for (const stbl of parseBoxes(data, minf.payloadStart, minf.end)) {
+              if (stbl.type === 'stts') stts = sttsEntries(data, stbl);
+              else if (stbl.type === 'stsz') sizes = stszSizes(data, stbl);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (!timescale || stts.length === 0 || sizes.length === 0) return null;
+  const targetDuration =
+    Math.floor((segmentDuration * timescale) / movieTimescale) + mediaTime;
+  if (targetDuration <= 0) return null;
+
+  const entries = stts.map((entry) => ({ ...entry }));
+  const prefix = entries
+    .slice(0, -1)
+    .reduce((sum, entry) => sum + entry.count * entry.delta, 0);
+  const newDelta = targetDuration - prefix;
+  if (newDelta <= 0) return null;
+  entries[entries.length - 1] = {
+    count: entries[entries.length - 1].count,
+    delta: newDelta,
+  };
+
+  const seconds = targetDuration / timescale;
+  const bitrate = seconds
+    ? Math.floor((sizes.reduce((sum, size) => sum + size, 0) * 8) / seconds)
+    : 0;
+  return {
+    targetDuration,
+    tkhdDuration: segmentDuration,
+    stts: entries,
+    bitrate,
+  };
+}
+
 interface PatchStats {
   realCount: number;
   sampleDelta: number;
@@ -521,6 +699,7 @@ interface PatchStats {
   bitrate: number;
   watermark: string;
   stripUdta: boolean;
+  audio: AudioStats | null;
 }
 
 function rebuildStbl(
@@ -528,10 +707,12 @@ function rebuildStbl(
   stbl: Mp4Box,
   delta: number,
   safeOffset: number,
-  video: boolean,
+  kind: string,
   stats: PatchStats,
 ): Uint8Array {
   const output: Uint8Array[] = [];
+  const video = kind === 'vide';
+  const audio = kind === 'soun' && stats.audio;
   for (const box of parseBoxes(data, stbl.payloadStart, stbl.end)) {
     if (box.type === 'stco' || box.type === 'co64') {
       if (video) {
@@ -543,12 +724,16 @@ function rebuildStbl(
       }
     } else if (video && box.type === 'stts') {
       output.push(buildStts(stats.realCount, stats.sampleDelta));
+    } else if (audio && box.type === 'stts') {
+      output.push(buildSttsEntries(stats.audio!.stts));
     } else if (video && box.type === 'stsc') {
       output.push(buildStsc(stats.stsc, stats.oldChunks + 1));
     } else if (video && box.type === 'stsz') {
       output.push(buildStsz(stats.sizes));
     } else if (video && box.type === 'stsd') {
       output.push(buildBox('stsd', patchBtrtInStsd(data.subarray(box.payloadStart, box.end), stats.bitrate)));
+    } else if (audio && box.type === 'stsd') {
+      output.push(buildBox('stsd', patchAudioStsd(data.subarray(box.payloadStart, box.end), stats.audio!.bitrate)));
     } else {
       output.push(bytesOf(data, box));
     }
@@ -561,13 +746,13 @@ function rebuildMinf(
   minf: Mp4Box,
   delta: number,
   safeOffset: number,
-  video: boolean,
+  kind: string,
   stats: PatchStats,
 ): Uint8Array {
   const output: Uint8Array[] = [];
   for (const box of parseBoxes(data, minf.payloadStart, minf.end)) {
     if (box.type === 'stbl') {
-      output.push(rebuildStbl(data, box, delta, safeOffset, video, stats));
+      output.push(rebuildStbl(data, box, delta, safeOffset, kind, stats));
     } else {
       output.push(bytesOf(data, box));
     }
@@ -580,15 +765,17 @@ function rebuildMdia(
   mdia: Mp4Box,
   delta: number,
   safeOffset: number,
-  video: boolean,
+  kind: string,
   stats: PatchStats,
 ): Uint8Array {
   const output: Uint8Array[] = [];
   for (const box of parseBoxes(data, mdia.payloadStart, mdia.end)) {
-    if (box.type === 'mdhd' && video) {
+    if (box.type === 'mdhd' && kind === 'vide') {
       output.push(patchMdhd(data, box, stats.totalDuration));
+    } else if (box.type === 'mdhd' && kind === 'soun' && stats.audio) {
+      output.push(patchMdhd(data, box, stats.audio.targetDuration));
     } else if (box.type === 'minf') {
-      output.push(rebuildMinf(data, box, delta, safeOffset, video, stats));
+      output.push(rebuildMinf(data, box, delta, safeOffset, kind, stats));
     } else {
       output.push(bytesOf(data, box));
     }
@@ -601,19 +788,21 @@ function rebuildTrak(
   trak: Mp4Box,
   delta: number,
   safeOffset: number,
-  video: boolean,
+  kind: string,
   stats: PatchStats,
 ): Uint8Array {
   const output: Uint8Array[] = [];
   for (const box of parseBoxes(data, trak.payloadStart, trak.end)) {
     if (box.type === 'udta' && stats.stripUdta) continue;
-    if (box.type === 'mdia') {
-      output.push(rebuildMdia(data, box, delta, safeOffset, video, stats));
+    if (box.type === 'tkhd' && kind === 'soun' && stats.audio) {
+      output.push(patchTkhdDuration(data, box, stats.audio.tkhdDuration));
+    } else if (box.type === 'mdia') {
+      output.push(rebuildMdia(data, box, delta, safeOffset, kind, stats));
     } else {
       output.push(bytesOf(data, box));
     }
   }
-  if (video) output.push(buildWatermark(stats.watermark));
+  if (kind === 'vide') output.push(buildWatermark(stats.watermark));
   return buildBox('trak', concat(output));
 }
 
@@ -628,7 +817,7 @@ function rebuildMoov(
   for (const box of parseBoxes(data, moov.payloadStart, moov.end)) {
     if (box.type === 'udta' && stats.stripUdta) continue;
     if (box.type === 'trak') {
-      output.push(rebuildTrak(data, box, delta, safeOffset, handlerType(data, box) === 'vide', stats));
+      output.push(rebuildTrak(data, box, delta, safeOffset, handlerType(data, box), stats));
     } else {
       output.push(bytesOf(data, box));
     }
@@ -661,6 +850,14 @@ export function patchBytes(input: Uint8Array, config: PatcherConfig): Uint8Array
     config.dummyPayloads[codec] ?? config.defaultDummyPayload,
     dummySize,
   );
+
+  const movieTimescale = mvhdTimescale(data, moov);
+  let audio: AudioStats | null = null;
+  for (const trak of parseBoxes(data, moov.payloadStart, moov.end)) {
+    if (trak.type === 'trak' && handlerType(data, trak) === 'soun') {
+      audio = readAudioStats(data, trak, movieTimescale);
+    }
+  }
 
   let realCount = 0;
   let sampleDelta = 0;
@@ -726,6 +923,7 @@ export function patchBytes(input: Uint8Array, config: PatcherConfig): Uint8Array
     bitrate,
     watermark: config.watermark,
     stripUdta: config.stripUdta,
+    audio,
   };
 
   const freeBox = config.freeBox ? buildBox('free', new Uint8Array(0)) : new Uint8Array(0);
