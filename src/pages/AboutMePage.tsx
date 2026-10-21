@@ -345,7 +345,7 @@ export default function AboutMePage() {
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
-                  onClick={() => setProjectModal({ name: 'vkintox', description: 'roblox shaders like reshade for sober, an android runtime for linux!', repoUrl: 'https://github.com/buwryme/vkintox', icon: 'sports_esports' })}
+                  onClick={() => setProjectModal({ name: 'vkintox', description: 'roblox shaders like reshade for sober, an android runtime for linux!', repoUrl: 'https://github.com/buwryme/vkintox', iconSrc: '/assets/vkintox.svg', downloadUrl: 'https://github.com/VKIntox/VKIntox/releases' })}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';
@@ -355,9 +355,26 @@ export default function AboutMePage() {
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '48px', marginBottom: '12px', color: 'var(--md-primary)' }}>sports_esports</span>
+                  <img src="/assets/vkintox.svg" alt="vkintox" style={{ width: '48px', height: '48px', marginBottom: '12px' }} />
                   <p className="m3-title-medium" style={{ margin: 0 }}>vkintox</p>
-                  <p className="m3-body-small" style={{ margin: '4px 0 0 0', color: 'var(--md-on-surface-variant)' }}>roblox shaders for linux</p>
+                  <p className="m3-body-small" style={{ margin: '4px 0 0 0', color: 'var(--md-on-surface-variant)' }}>reshade with proper depth, for linux.</p>
+                </div>
+                <div 
+                  className="m3-card" 
+                  style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
+                  onClick={() => setProjectModal({ name: 'roséline', description: 'run the macOS builds of Roblox with ease, using Rosemary.', repoUrl: 'https://github.com/buwryme/Roseline', iconSrc: '/assets/roseline.svg', downloadUrl: 'https://github.com/buwryme/Roseline/releases' })}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <img src="/assets/roseline.svg" alt="roséline" style={{ width: '48px', height: '48px', marginBottom: '12px' }} />
+                  <p className="m3-title-medium" style={{ margin: 0 }}>roséline</p>
+                  <p className="m3-body-small" style={{ margin: '4px 0 0 0', color: 'var(--md-on-surface-variant)' }}>run Roblox's macOS builds on linux</p>
                 </div>
                 <div 
                   className="m3-card" 
