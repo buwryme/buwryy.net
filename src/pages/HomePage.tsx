@@ -399,7 +399,7 @@ const socials = [
   { name: 'TikTok', handle: '@buwryy', icon: 'tiktok', url: 'https://tiktok.com/@buwryy' },
   { name: 'Twitter / X', handle: '@buwryme', icon: 'x', url: 'https://x.com/buwryme' },
   { name: 'GitHub', handle: 'buwryme', icon: 'github', url: 'https://github.com/buwryme' },
-  { name: 'Discord', handle: 'buwryy', icon: 'discord', url: 'http://discord.com/users/1380985600773198037' },
+  { name: 'Discord', handle: 'Join server', icon: 'discord', url: 'https://discord.gg/HrUrzXAxPV' },
   { name: 'Email', handle: 'hello@buwryy.net', icon: 'email', url: 'mailto:hello@buwryy.net' },
 ];
 
