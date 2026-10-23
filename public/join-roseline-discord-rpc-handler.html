@@ -4,130 +4,72 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Join Roblox · buwryy.net</title>
+    <title>handing join game task to roblox...</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght,GRAD,slnt,wdth,ROND@12..72,100..900,-50..100,-10..0,75..125,0..50&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #fffbff;
-        --card: #f7f2fa;
-        --text: #1d1b20;
-        --muted: #49454f;
-        --primary: #6750a4;
-        --on-primary: #ffffff;
-        --outline: #79747e;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #141218;
-          --card: #211f26;
-          --text: #e6e0e9;
-          --muted: #cac4d0;
-          --primary: #d0bcff;
-          --on-primary: #381e72;
-          --outline: #938f99;
-        }
-      }
-      * {
-        box-sizing: border-box;
+      html,
+      body {
+        height: 100%;
       }
       body {
+        box-sizing: border-box;
         margin: 0;
-        min-height: 100vh;
+        overflow: hidden;
         display: grid;
         place-items: center;
-        padding: 24px;
-        background: var(--bg);
-        color: var(--text);
+        padding: 32px;
+        background: #180711;
+        color: #fff2f9;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       }
-      main {
-        width: min(100%, 420px);
-        padding: 32px;
-        border: 1px solid color-mix(in srgb, var(--outline) 35%, transparent);
-        border-radius: 28px;
-        background: var(--card);
+      #snow {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
       }
-      .mark {
-        width: 48px;
-        height: 48px;
-        display: grid;
-        place-items: center;
-        margin-bottom: 24px;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        font-size: 24px;
-        font-weight: 700;
+      main {
+        position: relative;
+        z-index: 1;
+        max-width: 90vw;
+        text-align: center;
       }
       h1 {
-        margin: 0 0 8px;
-        font-size: 28px;
-        letter-spacing: -0.02em;
-      }
-      p {
         margin: 0;
-        line-height: 1.5;
+        font-family: "Google Sans Flex", system-ui, -apple-system, "Segoe UI",
+          sans-serif;
+        font-size: clamp(1.5rem, 4.5vw, 2.25rem);
+        font-weight: 800;
+        font-variation-settings:
+          "wght" 800,
+          "wdth" 95,
+          "ROND" 50;
+        letter-spacing: -0.015em;
+        line-height: 1.25;
+        color: #fff3fa;
+        transform: translateY(-0.08em);
       }
-      .status {
-        margin-bottom: 24px;
-        color: var(--muted);
-      }
-      .actions {
-        display: grid;
-        gap: 10px;
-      }
-      a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 48px;
-        padding: 0 24px;
-        border-radius: 999px;
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .primary {
-        background: var(--primary);
-        color: var(--on-primary);
-      }
-      .secondary {
-        border: 1px solid var(--outline);
-        color: var(--primary);
-      }
-      .hint {
-        margin-top: 24px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      .hidden {
-        display: none;
-      }
-      .error {
-        color: #ba1a1a;
-      }
-      @media (prefers-color-scheme: dark) {
-        .error {
-          color: #ffb4ab;
-        }
+      #dots {
+        white-space: nowrap;
       }
     </style>
   </head>
   <body>
+    <canvas id="snow" aria-hidden="true"></canvas>
     <main>
-      <div class="mark" aria-hidden="true">R</div>
-      <h1>Join Roblox</h1>
-      <p id="status" class="status">Asking your browser to hand this to Roblox.</p>
-      <div id="actions" class="actions">
-        <a id="open" class="primary" href="#">Open Roblox</a>
-        <a id="view" class="secondary" href="https://www.roblox.com/">View game page</a>
-      </div>
-      <p class="hint">
-        This page uses the <code>roblox://</code> link. If your browser blocks
-        custom app links, open the game page or use a browser outside Flatpak.
-      </p>
+      <h1>handing join game task to roblox<span id="dots" aria-hidden="true">.</span></h1>
     </main>
     <script>
       (() => {
+        const reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
         const params = new URLSearchParams(window.location.search);
         const placeId = (params.get("placeId") || "")
           .replace(/\D/g, "")
@@ -140,42 +82,104 @@
             ? rawJob
             : "";
 
-        const status = document.getElementById("status");
-        const open = document.getElementById("open");
-        const view = document.getElementById("view");
-        const actions = document.getElementById("actions");
+        const dots = document.getElementById("dots");
+        const frames = [".", "..", "..."];
+        let frame = 0;
 
-        if (!placeId) {
-          status.textContent = "This join link is missing a place id.";
-          status.classList.add("error");
-          actions.classList.add("hidden");
-          return;
+        if (reduced) {
+          dots.textContent = "...";
+        } else {
+          window.setInterval(() => {
+            frame = (frame + 1) % frames.length;
+            dots.textContent = frames[frame];
+          }, 420);
         }
 
-        const deepLink = `roblox://experiences/start?placeId=${placeId}${
-          jobId ? `&gameInstanceId=${jobId}` : ""
-        }`;
-        open.href = deepLink;
-        view.href = `https://www.roblox.com/games/${placeId}`;
+        if (placeId) {
+          const deepLink = `roblox://experiences/start?placeId=${placeId}${
+            jobId ? `&gameInstanceId=${jobId}` : ""
+          }`;
+          window.setTimeout(() => {
+            const frame = document.createElement("iframe");
+            frame.hidden = true;
+            frame.src = deepLink;
+            document.body.append(frame);
+          }, 450);
+        }
 
-        // a hidden frame lets the browser try the scheme without replacing
-        // this page when no handler is registered; the button is the
-        // reliable, user-initiated path.
-        const frame = document.createElement("iframe");
-        frame.hidden = true;
-        frame.src = deepLink;
-        document.body.append(frame);
+        const canvas = document.getElementById("snow");
+        const context = canvas.getContext("2d");
+        let width = 0;
+        let height = 0;
+        let flakes = [];
 
-        window.setTimeout(() => {
-          if (document.visibilityState === "visible") {
-            status.textContent =
-              "If nothing opened, press Open Roblox or use the game page.";
+        const makeSnow = () => {
+          const count = Math.min(
+            70,
+            Math.max(12, Math.round((width * height) / 24000)),
+          );
+          flakes = Array.from({ length: count }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            speed: 0.15 + Math.random() * 0.55,
+            drift: (Math.random() - 0.5) * 0.22,
+            phase: Math.random() * Math.PI * 2,
+          }));
+        };
+
+        const resize = () => {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          width = window.innerWidth;
+          height = window.innerHeight;
+          canvas.width = Math.round(width * dpr);
+          canvas.height = Math.round(height * dpr);
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+          context.setTransform(dpr, 0, 0, dpr, 0, 0);
+          makeSnow();
+        };
+
+        const draw = (now = 0) => {
+          context.clearRect(0, 0, width, height);
+          context.shadowColor = "rgba(255, 255, 255, 0.55)";
+          context.shadowBlur = 7;
+          context.fillStyle = "#ffffff";
+          context.globalAlpha = 0.5;
+
+          for (const flake of flakes) {
+            context.beginPath();
+            context.arc(
+              flake.x + Math.sin(now / 1700 + flake.phase) * 7,
+              flake.y,
+              2.2,
+              0,
+              Math.PI * 2,
+            );
+            context.fill();
+
+            if (!reduced) {
+              flake.y += flake.speed;
+              flake.x += flake.drift;
+              if (flake.y > height + 8) {
+                flake.y = -8;
+                flake.x = Math.random() * width;
+              }
+              if (flake.x < -8) flake.x = width + 8;
+              if (flake.x > width + 8) flake.x = -8;
+            }
           }
-        }, 2500);
 
-        open.addEventListener("click", () => {
-          status.textContent = "Waiting for your browser to open Roblox…";
-        });
+          context.globalAlpha = 1;
+          if (!reduced) window.requestAnimationFrame(draw);
+        };
+
+        window.addEventListener("resize", resize);
+        resize();
+        if (reduced) {
+          draw();
+        } else {
+          window.requestAnimationFrame(draw);
+        }
       })();
     </script>
   </body>
