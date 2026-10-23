@@ -12,6 +12,7 @@ export interface PatchConfig {
   dummySampleSize: number;
   trailingBytes: number;
   dummySizes: Record<string, number>;
+  method: 'mvhd' | 'legacy';
 }
 
 const GIST_RAW_URL =
@@ -34,6 +35,7 @@ name_box_payload = "buwryy<3"
 inflation_rate = 10
 dummy_sample_size = 8
 trailing_bytes = 184100
+method = "mvhd"
 
 [patcher.dummy_sizes]
 avc1 = 8
@@ -120,6 +122,7 @@ function normalize(raw: TomlValue): PatchConfig {
     dummySampleSize: Number(patcher.dummy_sample_size ?? 8),
     trailingBytes: Number(patcher.trailing_bytes ?? 184100),
     dummySizes,
+    method: patcher.method === 'legacy' ? 'legacy' : 'mvhd',
   };
 }
 

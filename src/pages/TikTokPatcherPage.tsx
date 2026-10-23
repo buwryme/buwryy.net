@@ -8,6 +8,7 @@ import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import Toast from '../components/Toast';
 import { DEFAULT_CONFIG, loadPatcherConfig, type PatchConfig } from '../lib/patcherConfig';
+import { patchMvhd } from '../lib/mvhdPatch';
 
 const PATCHER_STATUS_URL = 'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/tiktok-patcher-status';
 
@@ -207,6 +208,18 @@ export default function TikTokPatcherPage() {
       addLog(`processing: ${selectedFile.name}`);
       const fileData = await fetchFile(selectedFile);
       addLog(`input file size: ${(fileData.length / 1024 / 1024).toFixed(2)} MB`);
+
+      if (config.method === 'mvhd' && selectedFile.name.toLowerCase().endsWith('.mp4')) {
+        addLog('patching original MP4 container directly...');
+        const patched = patchMvhd(new Uint8Array(fileData));
+        addLog(`patched file size: ${(patched.length / 1024 / 1024).toFixed(2)} MB`);
+        setProgress(100);
+        const outputFileName = `${selectedFile.name.replace(/\.[^/.]+$/, '')}_tiktok.mp4`;
+        setProcessedFile({ data: patched, name: outputFileName });
+        setNextStepsOpen(true);
+        return;
+      }
+
       await ffmpeg.writeFile('input.mp4', fileData);
 
       const outputName = `output_${Date.now()}.mp4`;
@@ -240,7 +253,9 @@ export default function TikTokPatcherPage() {
       if (firstBoxType !== 'ftyp') throw new Error(`invalid MP4 structure: expected ftyp, got ${firstBoxType}`);
 
       addLog('patching mp4 structure...');
-      const patched = patchMP4(outputArray, config, fileData);
+      const patched = config.method === 'mvhd'
+        ? patchMvhd(outputArray)
+        : patchMP4(outputArray, config, fileData);
       addLog(`patched file size: ${(patched.length / 1024 / 1024).toFixed(2)} MB`);
 
       if (patched.length === 0) throw new Error('patched file is empty');
@@ -1271,16 +1286,25 @@ export default function TikTokPatcherPage() {
                   <div>
                     <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>video stream remains untouched</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      the original H.264/H.265 encoded frames are preserved exactly, without re-encoding. only the MP4 container structure is modified.
+                      the original encoded frames, audio, and mdat payload are preserved exactly. nothing is re-encoded.
                     </p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>graphic_eq</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>movie</span>
                   <div>
-                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>sample table inflation</p>
+                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>mvhd version upgrade</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      the <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stsz</code> table is expanded with codec-aware dummy samples (8B for H.264, 16B for HEVC). a cloned audio track with inflated sample tables triggers TikTok's passthrough.
+                      the movie header is upgraded to version 1 and its duration is set to <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>0xFFFFFFFFFFFFFFFF</code>, while creation time, timescale, matrix, and track IDs are preserved.
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>info</span>
+                  <div>
+                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>©cmt watermark</p>
+                    <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
+                      a single <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>©cmt</code> entry is appended to <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>udta/meta/ilst</code>: <strong>Patched by https://github.com/buwryme/tiktok-lossless-upload</strong>.
                     </p>
                   </div>
                 </div>
@@ -1289,34 +1313,7 @@ export default function TikTokPatcherPage() {
                   <div>
                     <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>chunk offset recalculation</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      the <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stco</code> and <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stsc</code> tables are rebuilt to correctly map samples to their new byte offsets.
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>info</span>
-                  <div>
-                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>metadata injection</p>
-                    <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      full iTunes metadata (10 tags) written to dual <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>meta</code> boxes inside <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>udta</code>.
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>memory</span>
-                  <div>
-                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>trailing garbage injection</p>
-                    <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      padding bytes appended after media data to produce structural anomalies that prevent parser assumptions.
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>check_circle</span>
-                  <div>
-                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>supported codecs</p>
-                    <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      H.264 (AVC), H.265 (HEVC), VP9, AV1, MPEG-4 Visual. AAC audio. dummy sample sizes auto-detected per codec.
+                      only <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>stco</code>/<code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>co64</code> offsets are shifted by the moov size change. sample tables and trailing data are untouched.
                     </p>
                   </div>
                 </div>
@@ -1325,11 +1322,11 @@ export default function TikTokPatcherPage() {
                   <div>
                     <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>implementation details</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      for the full technical breakdown, see the <strong><a href="https://github.com/buwryme/tikutils/blob/main/src/backend/patcher.py" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>source code</a></strong>.
+                      see the <strong><a href="https://github.com/buwryme/buwryy.net/blob/main/src/lib/mvhdPatch.ts" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>MVHD implementation</a></strong>. the legacy audio-inflation method remains available with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "legacy"</code>.
                     </p>
                   </div>
                 </div>
-              </div>
+                            </div>
             </div>
           </section>
         </div>
