@@ -15,8 +15,8 @@ export interface PatchConfig {
   method: 'mvhd' | 'legacy';
 }
 
-const GIST_RAW_URL =
-  'https://gist.githubusercontent.com/buwryme/e7dd8bca2094995943a855f0af985960/raw/tiktok_patcher.toml';
+const GIST_API_URL =
+  'https://api.github.com/gists/e7dd8bca2094995943a855f0af985960';
 
 const BUILTIN_TOML = `# Reverse engineered from Editing News' patcher and made open source.
 [patcher]
@@ -136,10 +136,16 @@ export async function loadPatcherConfig(reload = false): Promise<PatchConfig> {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
-    const response = await fetch(GIST_RAW_URL, { cache: 'no-store', signal: controller.signal });
+    const response = await fetch(GIST_API_URL, {
+      cache: 'no-store',
+      signal: controller.signal,
+      headers: { Accept: 'application/vnd.github+json' },
+    });
     clearTimeout(timer);
     if (response.ok) {
-      config = normalize(parseToml(await response.text()));
+      const payload = await response.json();
+      const text = payload?.files?.['tiktok_patcher.toml']?.content;
+      if (typeof text === 'string') config = normalize(parseToml(text));
     }
   } catch {
     // Keep the built-in fallback.
