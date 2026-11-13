@@ -1,0 +1,77 @@
+.page-backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.page-backdrop-cookie {
+    position: absolute;
+    right: -160px;
+    top: 40%;
+    transform: translateY(-50%);
+    opacity: 0.12;
+    filter: saturate(0.25) brightness(1.15) contrast(0.95);
+    animation: spin-clockwise 60s linear infinite;
+    transform-origin: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.page-backdrop-cookie.reverse {
+    right: auto;
+    left: -120px;
+    top: 2%;
+    transform: none;
+    opacity: 0.09;
+    animation-direction: reverse;
+}
+
+.page-backdrop-blob {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.page-backdrop-blob.blob-1 {
+    top: -20%;
+    right: -15%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle at center, var(--blob-color-1) 0%, transparent 70%);
+    opacity: var(--blob-opacity);
+    filter: blur(40px);
+}
+
+.page-backdrop-blob.blob-2 {
+    bottom: -25%;
+    left: -20%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle at center, var(--blob-color-2) 0%, transparent 70%);
+    opacity: var(--blob-opacity-secondary);
+    filter: blur(35px);
+}
+
+.page-backdrop-blob.blob-3 {
+    top: 30%;
+    left: 50%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle at center, var(--blob-color-3) 0%, transparent 70%);
+    opacity: var(--blob-opacity);
+    filter: blur(38px);
+}
+
+@media (max-width: 720px) {
+    .page-backdrop-cookie {
+        right: -220px;
+        top: 30%;
+        opacity: 0.08;
+    }
+    .page-backdrop-cookie.reverse {
+        left: -160px;
+        top: 1%;
+        opacity: 0.06;
+    }
+}

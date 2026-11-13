@@ -1,5 +1,6 @@
 import React from 'react';
 import './CookieShape.css';
+import { COOKIE_PATH } from '../lib/cookiePath';
 
 interface CookieShapeProps {
   size?: string;
@@ -16,32 +17,7 @@ const CookieShape: React.FC<CookieShapeProps> = ({
   strokeColor,
   children 
 }) => {
-  // Generate a mathematically perfect 12-point scalloped "cookie" circle (cosine-modulated circle)
-  const generateScallopedCirclePath = () => {
-    const centerX = 50;
-    const centerY = 50;
-    const totalSteps = 120; // 120 steps for an incredibly smooth path
-    let path = '';
-    
-    for (let i = 0; i <= totalSteps; i++) {
-      const angle = (i * 2 * Math.PI) / totalSteps;
-      // Base radius of 41 modulated by a gentler 12-period cosine wave with 2.8 amplitude for incredibly soft, shallow scallops
-      const r = 41 + 2.8 * Math.cos(12 * angle);
-      const x = centerX + r * Math.cos(angle - Math.PI / 2);
-      const y = centerY + r * Math.sin(angle - Math.PI / 2);
-      
-      if (i === 0) {
-        path += `M ${x.toFixed(3)},${y.toFixed(3)}`;
-      } else {
-        path += ` L ${x.toFixed(3)},${y.toFixed(3)}`;
-      }
-    }
-    
-    path += ' Z';
-    return path;
-  };
-
-  const cookiePath = generateScallopedCirclePath();
+  const cookiePath = COOKIE_PATH;
 
   return (
     <div className={`cookie-shape-container ${className}`} style={{ width: size, height: size }}>

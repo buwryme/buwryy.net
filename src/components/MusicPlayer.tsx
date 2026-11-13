@@ -98,7 +98,38 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
   const animationFrameRef = useRef<number>();
 
   const currentSong = ALBUM_SONGS[currentSongIndex];
-  const albumArtUrl = 'https://portalpopline.com.br/wp-content/uploads/2026/04/ariana-grande-petal.jpg';
+  const albumArtUrl = '/assets/bestAlbumEverPleaseDontDeleteMe.png';
+  const coverCacheKey = 'bestAlbumEverPleaseDontDeleteMe.png';
+  const [coverUrl, setCoverUrl] = useState(() => {
+    try { return localStorage.getItem(coverCacheKey) || albumArtUrl; }
+    catch { return albumArtUrl; }
+  });
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem(coverCacheKey);
+      if (cached)
+      {
+        setCoverUrl(cached);
+        return;
+      }
+    }
+    catch { /* storage can be blocked */ }
+
+    fetch(albumArtUrl)
+      .then((response) => response.blob())
+      .then((blob) => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }))
+      .then((dataUrl) => {
+        try { localStorage.setItem(coverCacheKey, dataUrl); } catch { /* quota or private mode */ }
+        setCoverUrl(dataUrl);
+      })
+      .catch(() => { /* the local asset still loads */ });
+  }, []);
 
   // Handle track changing: reset rotation, times, reload and play
   useEffect(() => {
@@ -239,7 +270,7 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
               names the artwork; this one is decorative. */}
           <div className="card-background">
             <img
-              src={albumArtUrl}
+              src={coverUrl}
               alt=""
               aria-hidden="true"
               className="blur-bg"
@@ -256,7 +287,7 @@ export default function MusicPlayer({ inline = false }: MusicPlayerProps) {
               style={{ transform: `rotateZ(${rotation}deg)` }}
             >
               <img
-                src={albumArtUrl}
+                src={coverUrl}
                 alt={`${currentSong.title} album cover`}
                 onError={(e) => {
                   e.currentTarget.style.background =

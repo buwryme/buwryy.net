@@ -1118,7 +1118,7 @@ export default function TikTokPatcherPage() {
         minHeight: '100vh',
         background: 'var(--md-background)',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'clip',
         display: 'flex',
         flexDirection: 'column',
       }}>

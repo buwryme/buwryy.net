@@ -1,0 +1,15 @@
+.site-cookie {
+    display: inline-block;
+    flex: none;
+    pointer-events: none;
+}
+
+.site-cookie.is-spinning {
+    animation: cookie-bullet-spin 18s linear infinite;
+    transform-origin: 50% 50%;
+}
+
+@keyframes cookie-bullet-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

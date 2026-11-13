@@ -1,14 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Footer from '../components/Footer';
 import MusicPlayer from '../components/MusicPlayer';
 import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import CookieShape from '../components/CookieShape';
-import Toast from '../components/Toast';
+import SiteHeader from '../components/SiteHeader';
+import { HOME_NAV } from '../lib/homeNav';
+import { useSiteTheme } from '../lib/useSiteTheme';
+import { loadPosts, type BlogPost } from '../lib/blog';
+import './HomePage.css';
 
 export default function HomePage() {
+  const location = useLocation();
+  const { isDark, setTheme } = useSiteTheme();
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [socialsOpen, setSocialsOpen] = useState(false);
   const [socialsClosing, setSocialsClosing] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -16,112 +23,81 @@ export default function HomePage() {
   const [acknowledgementsOpen, setAcknowledgementsOpen] = useState(false);
   const [acknowledgementsClosing, setAcknowledgementsClosing] = useState(false);
   const [musicPlayerVisible, setMusicPlayerVisible] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('buwryy-theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-  const [toast, setToast] = useState({ 
-    message: '', 
-    visible: false, 
-    closing: false, 
-    id: 'toast-1',
-    updateKey: 0 
-  });
+  const [activeNav, setActiveNav] = useState('home');
   const [typedText, setTypedText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
-  const [typingComplete, setTypingComplete] = useState(false);
   const [showBuwryy, setShowBuwryy] = useState(false);
   const [showExclamation, setShowExclamation] = useState(false);
-  const toastTimeoutRef = useRef<number | null>(null);
   const typingText = "hey, i'm ";
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    localStorage.setItem('buwryy-theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only auto-update if user hasn't manually set a preference
-      if (!localStorage.getItem('buwryy-theme')) {
-        setIsDark(e.matches);
-      }
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    loadPosts().then(setPosts).catch(() => { /* the blog section just stays quiet */ });
   }, []);
 
   useEffect(() => {
+    const update = () => {
+      const marker = window.scrollY + window.innerHeight * 0.35;
+      const projects = document.getElementById('projects');
+      const blog = document.getElementById('blog');
+      const projectTop = projects ? projects.getBoundingClientRect().top + window.scrollY : Infinity;
+      const blogTop = blog ? blog.getBoundingClientRect().top + window.scrollY : Infinity;
+
+      if (marker >= blogTop) setActiveNav('blog');
+      else if (marker >= projectTop) setActiveNav('projects');
+      else setActiveNav('home');
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    const timer = window.setInterval(update, 150);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (location.hash === '#socials') setSocialsOpen(true);
+    if (location.hash === '#projects') {
+      const timer = window.setTimeout(() => {
+        document.getElementById('projects')?.scrollIntoView({ block: 'start' });
+      }, 500);
+      return () => window.clearTimeout(timer);
+    }
+  }, [location.hash]);
+
+  useEffect(() => {
     let currentIndex = 0;
-    const typingInterval = setInterval(() => {
+    const typingInterval = window.setInterval(() => {
       if (currentIndex <= typingText.length) {
         setTypedText(typingText.slice(0, currentIndex));
         currentIndex++;
       } else {
-        clearInterval(typingInterval);
-        setTypingComplete(true);
-        // Show buwryy immediately after typing completes
+        window.clearInterval(typingInterval);
         setShowBuwryy(true);
-        // Show exclamation after buwryy animation (6 chars * 50ms = 300ms)
-        setTimeout(() => {
-          setShowExclamation(true);
-        }, 300);
+        window.setTimeout(() => setShowExclamation(true), 300);
       }
-    }, 60);
+    }, 40);
 
-    const cursorInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
+    const cursorInterval = window.setInterval(() => {
+      setShowCursor((previous) => !previous);
     }, 530);
 
     return () => {
-      clearInterval(typingInterval);
-      clearInterval(cursorInterval);
+      window.clearInterval(typingInterval);
+      window.clearInterval(cursorInterval);
     };
   }, []);
 
   const toggleTheme = (theme: 'light' | 'dark') => {
-    setIsDark(theme === 'dark');
-  };
-
-  const showToast = (message: string) => {
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-    
-    // Destroy current toast immediately
-    setToast(prev => ({ 
-      ...prev,
-      visible: false,
-      closing: false,
-    }));
-    
-    // Recreate toast with new message after brief delay
-    setTimeout(() => {
-      setToast(prev => ({ 
-        ...prev,
-        message, 
-        visible: true, 
-        closing: false,
-        updateKey: prev.updateKey + 1,
-      }));
-      
-      toastTimeoutRef.current = window.setTimeout(() => {
-        setToast(prev => ({ ...prev, closing: true }));
-        setTimeout(() => {
-          setToast(prev => ({ ...prev, message: '', visible: false, closing: false }));
-        }, 300);
-      }, 3000);
-    }, 50);
+    setTheme(theme);
   };
 
   const handleNavClick = (section: string) => {
     if (section === 'socials') {
       setSocialsOpen(true);
-    } else {
-      showToast('not implemented yet');
+    } else if (section === 'projects') {
+      document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -131,7 +107,7 @@ export default function HomePage() {
       minHeight: '100vh', 
       background: 'var(--md-background)',
       position: 'relative',
-      overflow: 'hidden',
+      overflowX: 'clip',
       transition: 'background-color 0.3s ease',
       display: 'flex',
       flexDirection: 'column',
@@ -194,97 +170,27 @@ export default function HomePage() {
       </div>
 
       <div className="page-shell">
-        <header className="page-header animate-fade-in">
-          <Link to="/" className="header-logo-link" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-            <Logo />
-            <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
-              buwryy<span style={{ color: 'var(--md-on-surface-variant)' }}>.net</span>
-            </span>
-          </Link>
-          
-          <div className="theme-toggle" style={{
-            display: 'inline-flex',
-            borderRadius: 'var(--md-shape-full)',
-            background: 'var(--md-surface-container)',
-            padding: '4px',
-            gap: '0',
-            boxShadow: 'var(--md-elevation-1)',
-          }}>
-            <button
-              onClick={() => toggleTheme('light')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                borderRadius: 'var(--md-shape-full)',
-                background: !isDark ? 'var(--md-primary)' : 'transparent',
-                color: !isDark ? 'var(--md-on-primary)' : 'var(--md-on-surface)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s var(--md-motion-spring-bouncy)',
-                fontFamily: "'Google Sans Flex', sans-serif",
-                fontWeight: 500,
-                fontSize: '14px',
-              }}
-              aria-label="Light mode"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>light_mode</span>
-            </button>
-            <button
-              onClick={() => toggleTheme('dark')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                borderRadius: 'var(--md-shape-full)',
-                background: isDark ? 'var(--md-primary)' : 'transparent',
-                color: isDark ? 'var(--md-on-primary)' : 'var(--md-on-surface)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s var(--md-motion-spring-bouncy)',
-                fontFamily: "'Google Sans Flex', sans-serif",
-                fontWeight: 500,
-                fontSize: '14px',
-              }}
-              aria-label="Dark mode"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>dark_mode</span>
-            </button>
-          </div>
-        </header>
+        <SiteHeader
+          isDark={isDark}
+          onThemeChange={toggleTheme}
+          nav={HOME_NAV}
+          onAction={handleNavClick}
+          activeNav={activeNav}
+        />
 
-        <section className="animate-slide-up" style={{ marginBottom: '48px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <span className="m3-chip" style={{
-              background: '#FFE8F0',
-              color: '#8B3A5A',
-              border: 'none',
-            }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>auto_awesome</span>
-              welcome
-            </span>
-          </div>
-          
-          <h1 className="m3-display-large m3-emphasized" style={{
-            color: 'var(--md-on-background)',
-            margin: '0 0 16px 0',
-            /* 36px overflowed the line at 390px, wrapping the "!" onto its
-               own row under a phantom blank line from the old 1.2em
-               min-height. */
-            fontSize: 'clamp(30px, 8vw, 57px)',
-            lineHeight: '1.15',
-          }}>
+        <section className="home-hero animate-slide-up">
+          <span className="m3-chip home-chip">
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>auto_awesome</span>
+            welcome
+          </span>
+          <h1 className="home-title">
             {typedText}
             {showBuwryy && (
-              <span style={{ whiteSpace: 'nowrap' }}>
+              <span className="rainbow-word">
                 {'buwryy'.split('').map((char, charIndex) => (
                   <span
                     key={charIndex}
-                    className="char-pop gradient-text"
+                    className="char-pop"
                     style={{
                       animationDelay: `${charIndex * 50}ms`,
                       display: 'inline-block',
@@ -296,45 +202,98 @@ export default function HomePage() {
               </span>
             )}
             {showExclamation && (
-              <span style={{
-                animation: 'exclamationAppear 0.2s ease-out forwards',
-              }}>!</span>
+              <span style={{ animation: 'exclamationAppear 0.2s ease-out forwards' }}>!</span>
             )}
-            <span style={{
-              opacity: showCursor ? 0.4 : 0,
-              transition: 'opacity 0.1s',
-              fontWeight: 300,
-            }}>|</span>
+            <span style={{ opacity: showCursor ? 0.4 : 0, transition: 'opacity 0.1s', fontWeight: 300 }}>|</span>
           </h1>
-          
-          <p className="m3-body-large" style={{
-            color: 'var(--md-on-surface-variant)',
-            maxWidth: '500px',
-            lineHeight: '1.6',
-          }}>
-            welcome to my website &lt;3
+          <p className="home-lede">
+            welcome to my website! it is very cool please check it out i took my dear time to make this :&gt;
           </p>
+          <div className="home-actions">
+            <Link to="/vkintox" className="m3-btn-filled">see VKIntox</Link>
+            <Link to="/blog" className="m3-btn-tonal">read my blog</Link>
+          </div>
         </section>
 
-        <section className="animate-slide-up delay-200" style={{ marginBottom: '48px', position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <div className="m3-button-group" style={{ width: '100%', maxWidth: '480px' }}>
-            <Link to="/tiktok-patcher" className="m3-button-group-item" style={{ flex: 1, textDecoration: 'none' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>music_note</span>
-              <span>TikTok Patcher</span>
-            </Link>
-            <Link to="/about-me" className="m3-button-group-item" style={{ flex: 1, textDecoration: 'none' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>person</span>
-              <span>About Me</span>
-            </Link>
-            <button
-              className="m3-button-group-item"
-              onClick={() => handleNavClick('socials')}
-              style={{ flex: 1 }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>public</span>
-              <span>Socials</span>
-            </button>
+        <section id="about" className="home-section">
+          <div className="home-section-head">
+            <h2>about me</h2>
           </div>
+          <div className="home-about">
+            <div className="home-about-copy">
+              <p>
+                i am an editor, mostly known for my editing style in the Roblox editing
+                community. i also code as a side hobby and am currently doing a CS major.
+              </p>
+              <button
+                type="button"
+                className="m3-btn-tonal home-music-toggle"
+                onClick={() => setMusicPlayerVisible((visible) => !visible)}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>music_note</span>
+                {musicPlayerVisible ? 'hide the player' : 'music i like...'}
+              </button>
+              {musicPlayerVisible && (
+                <div className="home-music-player">
+                  <MusicPlayer inline />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section id="projects" className="home-section">
+          <div className="home-section-head">
+            <h2>projects</h2>
+            <p className="home-aside-right">
+              RIP python Sharptape,
+              <br />
+              you are going to get rewritten in Rust
+            </p>
+          </div>
+          <div className="home-projects">
+            {PROJECTS.map((project) => {
+              const body = (
+                <>
+                  <img src={project.icon} alt="" width={42} height={42} />
+                  <span>
+                    <strong>{project.name}</strong>
+                    <small>{project.tagline}</small>
+                  </span>
+                </>
+              );
+
+              return project.to ? (
+                <Link key={project.name} to={project.to} className="home-project">
+                  {body}
+                </Link>
+              ) : (
+                <a key={project.name} href={project.href} className="home-project">
+                  {body}
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="blog" className="home-section">
+          <div className="home-section-head">
+            <h2>blog</h2>
+            <Link to="/blog" className="home-section-link">all posts</Link>
+          </div>
+          {posts.length ? (
+            <div className="home-blog-list">
+              {posts.slice(0, 2).map((post) => (
+                <Link key={post.slug} to={`/blog/${post.slug}`} className="home-blog-card">
+                  <span>{new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  <strong>{post.title}</strong>
+                  {post.summary && <p>{post.summary}</p>}
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="home-muted">the gist is quiet right now.</p>
+          )}
         </section>
 
         <Footer 
@@ -352,7 +311,6 @@ export default function HomePage() {
           setSocialsClosing(false);
         }, 300);
       }} />
-      {musicPlayerVisible && <MusicPlayer />}
       <AcknowledgementsModal isOpen={acknowledgementsOpen} isClosing={acknowledgementsClosing} onClose={() => {
         setAcknowledgementsClosing(true);
         setTimeout(() => {
@@ -368,32 +326,17 @@ export default function HomePage() {
         }, 200);
       }} />
       </div>
-      <Toast message={toast.message} isVisible={toast.visible} isClosing={toast.closing} toastKey={`${toast.id}-${toast.updateKey}`} />
     </>
   );
 }
 
-function Logo() {
-  return (
-    <div style={{
-      width: '48px',
-      height: '48px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'transform 0.3s var(--md-motion-spring-bouncy)',
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-    }}
-    >
-      <img src="/assets/logo.svg" alt="buwryy.net logo" className="logo-icon" width="48" height="48" />
-    </div>
-  );
-}
+const PROJECTS: { name: string; tagline: string; icon: string; href?: string; to?: string }[] = [
+  { name: 'sharptape', tagline: 'topaz video ai alternative for linux', icon: '/assets/sharptape.svg', href: 'https://github.com/buwryme/sharptape' },
+  { name: 'tikutils', tagline: 'patch tiktok videos losslessly', icon: '/assets/tikutils.svg', href: 'https://github.com/buwryme/tikutils' },
+  { name: 'vkintox', tagline: 'reshade with proper depth, for linux', icon: '/assets/vkintox.svg', to: '/vkintox' },
+  { name: 'roséline', tagline: "run roblox's macos builds on linux", icon: '/assets/roseline.svg', href: 'https://github.com/buwryme/Roseline' },
+  { name: 'this website', tagline: 'this website is open source, too!\ndid you know it is serverless?', icon: '/assets/logo.svg', href: 'https://github.com/buwryme/buwryy.net' },
+];
 
 const socials = [
   { name: 'TikTok', handle: '@buwryy', icon: 'tiktok', url: 'https://tiktok.com/@buwryy' },
@@ -474,7 +417,7 @@ function SocialsModal({ isOpen, isClosing, onClose }: { isOpen: boolean; isClosi
         <h2 className="m3-dialog-title">find me</h2>
         <div className="m3-dialog-content">
           <p style={{ marginBottom: '16px' }}>
-            my socials. say hi!
+            everywhere you can contact me. say hello!!!
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {socials.map((social) => (
