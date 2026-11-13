@@ -7,6 +7,7 @@ import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import CookieShape from '../components/CookieShape';
 import SiteHeader from '../components/SiteHeader';
+import RainbowWord from '../components/RainbowWord';
 import { HOME_NAV } from '../lib/homeNav';
 import { useSiteTheme } from '../lib/useSiteTheme';
 import { loadPosts, type BlogPost } from '../lib/blog';
@@ -186,20 +187,11 @@ export default function HomePage() {
           <h1 className="home-title">
             {typedText}
             {showBuwryy && (
-              <span className="rainbow-word">
-                {'buwryy'.split('').map((char, charIndex) => (
-                  <span
-                    key={charIndex}
-                    className="char-pop"
-                    style={{
-                      animationDelay: `${charIndex * 50}ms`,
-                      display: 'inline-block',
-                    }}
-                  >
-                    {char}
-                  </span>
-                ))}
-              </span>
+              <RainbowWord
+                text="buwryy"
+                letterClassName="char-pop"
+                letterStyle={(index) => ({ animationDelay: `${index * 50}ms` })}
+              />
             )}
             {showExclamation && (
               <span style={{ animation: 'exclamationAppear 0.2s ease-out forwards' }}>!</span>

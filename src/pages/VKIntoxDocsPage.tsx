@@ -404,8 +404,8 @@ export default function VKIntoxDocsPage()
                                     <li>The shader manager compile-tests every discovered shader and marks the ones that need a depth buffer.</li>
                                 </ul>
                                 <Callout kind="caution">
-                                    Some shaders use features the compiler doesn't implement. Run the compile
-                                    test before you blame the effect chain.
+                                    Some shaders use features the compiler doesn't implement, or generally, the
+                                    shader might look wrong and/or inaccurate.
                                 </Callout>
                             </section>
 

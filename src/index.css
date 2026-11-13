@@ -542,22 +542,28 @@
       #9be7b0 66.667%,
       #8fd9f5 100%
     );
+    position: relative;
     display: inline-block;
     white-space: nowrap;
     padding: 0.08em 0 0.24em;
     margin: -0.08em 0 -0.24em;
+    text-shadow: 0 0 0.14em rgba(255, 176, 205, 0.35);
+    animation: rainbowPhase 5.3s linear infinite;
+  }
+
+  .rainbow-letter {
+    display: inline-block;
     background-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.38'/%3E%3C/svg%3E"),
       var(--rainbow);
-    background-size: 120px 120px, 100% 100%;
-    background-position: 0 0, 50% 50%;
+    background-size: 120px 120px, var(--word-w, 100%) 100%;
+    background-position: calc(-1 * var(--letter-x, 0px)) 0,
+      calc(-1 * var(--letter-x, 0px)) 0;
     background-blend-mode: soft-light, normal;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    text-shadow: 0 0 0.14em rgba(255, 176, 205, 0.35);
-    animation: rainbowPhase 5.3s linear infinite;
   }
 
   [data-theme="light"] .rainbow-word {

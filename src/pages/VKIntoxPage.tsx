@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import RedirectModal from '../components/RedirectModal';
+import RainbowWord from '../components/RainbowWord';
 import { useSiteTheme } from '../lib/useSiteTheme';
 import { VKINTOX_NAV } from '../lib/vkNav';
 import './VKIntoxPage.css';
@@ -101,7 +102,7 @@ export default function VKIntoxPage()
                             <h1 className="m3-display-large m3-emphasized vk-title">
                                 Unbannable <span className="vk-underline">Linux</span>
                                 <br />
-                                shaders for <span className="rainbow-word vk-accent">Roblox</span>
+                                shaders for <RainbowWord text="Roblox" className="vk-accent" />
                                 <br />
                                 and many other games
                             </h1>
