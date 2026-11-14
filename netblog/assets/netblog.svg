@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="netblog-title netblog-desc">
+  <title id="netblog-title">Netblog</title>
+  <desc id="netblog-desc">App icon for Netblog: a white blog page with a folded corner, joined by a pink link to a second node, one node overlapping the page corner, on a dark rounded tile.</desc>
+  <defs>
+    <linearGradient id="netblog-tile" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="122">
+      <stop offset="0" stop-color="#2C2C36"/>
+      <stop offset="1" stop-color="#101016"/>
+    </linearGradient>
+    <radialGradient id="netblog-glow" gradientUnits="userSpaceOnUse" cx="86" cy="96" r="50">
+      <stop offset="0" stop-color="#FF4D8D" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#FF4D8D" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="netblog-chip">
+      <rect x="6" y="6" width="116" height="116" rx="27"/>
+    </clipPath>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="27" fill="url(#netblog-tile)"/>
+  <g clip-path="url(#netblog-chip)">
+    <circle cx="86" cy="96" r="50" fill="url(#netblog-glow)"/>
+  </g>
+  <rect x="7.2" y="7.2" width="113.6" height="113.6" rx="25.8" fill="none" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="1.6"/>
+  <path d="M36 16h30l24 24v60a8 8 0 0 1-8 8H36a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8Z" fill="#FFFFFF"/>
+  <path d="M66 16v14a10 10 0 0 0 10 10h14Z" fill="#DADBE4"/>
+  <path d="M46 58 86 96" fill="none" stroke="#FF4D8D" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="86" cy="96" r="17" fill="#FF4D8D"/>
+  <circle cx="46" cy="58" r="12" fill="#FF4D8D"/>
+</svg>

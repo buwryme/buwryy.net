@@ -1,0 +1,186 @@
+.post-list {
+  background: transparent;
+}
+
+.post-row {
+  margin: 2px 8px;
+  border-radius: 10px;
+}
+
+.post-row:hover {
+  background: alpha(@accent_bg_color, 0.06);
+}
+
+.post-row:selected {
+  background: alpha(@accent_bg_color, 0.16);
+}
+
+.post-row-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.post-row-sub {
+  font-size: 11px;
+  opacity: 0.62;
+}
+
+.drag-handle {
+  opacity: 0.38;
+}
+
+.sidebar-search {
+  margin: 0;
+}
+
+.sidebar-footer {
+  border-top: 1px solid alpha(@borders, 0.7);
+}
+
+.status-dot {
+  font-size: 10px;
+}
+
+.status-dot.status-synced {
+  color: @success_color;
+}
+
+.status-dot.status-dirty {
+  color: @warning_color;
+}
+
+.status-dot.status-busy {
+  color: @accent_color;
+}
+
+.status-dot.status-error {
+  color: @error_color;
+}
+
+.status-label {
+  font-size: 11px;
+  opacity: 0.68;
+}
+
+.editor-pane {
+  background: transparent;
+}
+
+.post-title-entry {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 6px 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.post-title-entry:focus {
+  background: transparent;
+  box-shadow: none;
+}
+
+.meta-entry {
+  font-size: 13px;
+}
+
+.field-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  opacity: 0.52;
+}
+
+.field-error {
+  color: @error_color;
+  font-size: 12px;
+}
+
+.date-label {
+  font-size: 13px;
+}
+
+.body-editor {
+  border: 1px solid alpha(@borders, 0.85);
+  border-radius: 14px;
+  background: @card_bg_color;
+  min-height: 280px;
+}
+
+.body-source {
+  font-family: "Google Sans Code", "Roboto Mono", monospace;
+  font-size: 13px;
+}
+
+.body-editor textview,
+.body-editor text {
+  background-color: @theme_bg_color;
+  color: @theme_text_color;
+}
+
+.body-editor gutter,
+.body-editor gutter text {
+  background-color: @theme_bg_color;
+  color: alpha(@theme_text_color, 0.45);
+}
+
+.preview-shell {
+  border: 1px solid alpha(@borders, 0.85);
+  border-radius: 14px;
+  background: @card_bg_color;
+}
+
+.preview-frame {
+  border-radius: 14px;
+  background: transparent;
+}
+
+.publish-button:disabled {
+  opacity: 0.45;
+}
+
+.post-actions {
+  margin-right: 4px;
+}
+
+.delete-post-button:hover {
+  color: @error_color;
+  background: alpha(@error_color, 0.12);
+}
+
+.about-button {
+  padding: 4px;
+}
+
+.about-button image {
+  border-radius: 6px;
+}
+
+.editor-switcher {
+  font-size: 11px;
+}
+
+.word-count {
+  font-size: 11px;
+}
+
+.sidebar-empty {
+  font-size: 12px;
+}
+
+.sidebar-empty > .title {
+  font-size: 16px;
+}
+
+.sidebar-empty > .description {
+  font-size: 12px;
+}
+
+.date-calendar {
+  padding: 4px;
+}
+
+toast {
+  font-size: 13px;
+}

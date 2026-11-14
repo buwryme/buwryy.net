@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>net.buwryy.Netblog</id>
+  <name>Netblog</name>
+  <summary>Edit buwryy.net posts stored in a GitHub gist</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>Netblog is a focused desktop editor for the posts behind buwryy.net. It treats the blog as one GitHub gist, opened through the GitHub CLI account already signed in on the machine.</p>
+    <p>It reads and writes the same GitHub gist through the GitHub CLI, so it uses the account you already authenticated with gh. Write in Markdown, check the live preview, rearrange posts, and publish when you are ready.</p>
+    <ul>
+      <li>Browse and search the whole blog from a native sidebar.</li>
+      <li>Edit Markdown with syntax highlighting and a live preview.</li>
+      <li>Reorder posts by dragging, or with the keyboard.</li>
+      <li>Delete posts with an undo toast before publishing.</li>
+      <li>Publish the complete gist with one action.</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">net.buwryy.Netblog.desktop</launchable>
+  <provides>
+    <binary>netblog</binary>
+  </provides>
+  <categories>
+    <category>Office</category>
+    <category>TextEditor</category>
+  </categories>
+  <url type="homepage">https://buwryy.net</url>
+  <url type="bugtracker">https://github.com/buwryme/buwryy.net/issues</url>
+  <developer id="net.buwryy">
+    <name>buwryme</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-11-13">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Netblog
+GenericName=Blog Editor
+Comment=Edit buwryy.net posts stored in a GitHub gist
+Exec=@BINDIR@/netblog %U
+Icon=net.buwryy.Netblog
+Terminal=false
+Categories=TextEditor;Utility;GTK;
+Keywords=blog;gist;markdown;write;edit;
+StartupNotify=true
+StartupWMClass=net.buwryy.Netblog

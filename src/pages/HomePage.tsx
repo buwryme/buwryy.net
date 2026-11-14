@@ -327,6 +327,7 @@ const PROJECTS: { name: string; tagline: string; icon: string; href?: string; to
   { name: 'tikutils', tagline: 'patch tiktok videos losslessly', icon: '/assets/tikutils.svg', href: 'https://github.com/buwryme/tikutils' },
   { name: 'vkintox', tagline: 'reshade with proper depth, for linux', icon: '/assets/vkintox.svg', to: '/vkintox' },
   { name: 'roséline', tagline: "run roblox's macos builds on linux", icon: '/assets/roseline.svg', href: 'https://github.com/buwryme/Roseline' },
+  { name: 'netblog', tagline: 'blog manager for this website.\npowered by a github gist.', icon: '/assets/netblog.svg', href: 'https://github.com/buwryme/buwryy.net/tree/main/netblog' },
   { name: 'this website', tagline: 'this website is open source, too!\ndid you know it is serverless?', icon: '/assets/logo.svg', href: 'https://github.com/buwryme/buwryy.net' },
 ];
 
