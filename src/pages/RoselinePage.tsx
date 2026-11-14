@@ -7,6 +7,7 @@ import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import RedirectModal from '../components/RedirectModal';
 import { useSiteTheme } from '../lib/useSiteTheme';
+import { usePageIcon } from '../lib/usePageIcon';
 import { ROSELINE_NAV } from '../lib/roselineNav';
 import './RoselinePage.css';
 
@@ -18,6 +19,7 @@ const DISCORD = 'https://discord.gg/HrUrzXAxPV';
 
 export default function RoselinePage()
 {
+    usePageIcon('/assets/roseline.svg');
     const { isDark, setTheme } = useSiteTheme();
     const location = useLocation();
     const [copied, setCopied] = useState(false);

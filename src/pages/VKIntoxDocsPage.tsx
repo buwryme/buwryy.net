@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import { useSiteTheme } from '../lib/useSiteTheme';
+import { usePageIcon } from '../lib/usePageIcon';
 import { VKINTOX_NAV } from '../lib/vkNav';
 import './VKIntoxDocsPage.css';
 
@@ -102,6 +103,7 @@ function Callout({ kind = 'note', label, children }: { kind?: 'note' | 'caution'
 
 export default function VKIntoxDocsPage()
 {
+    usePageIcon('/assets/vkintox.svg');
     const { isDark, setTheme } = useSiteTheme();
     const [active, setActive] = useState(SECTIONS[0].id);
     const [privacyOpen, setPrivacyOpen] = useState(false);

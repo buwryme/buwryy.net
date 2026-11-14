@@ -10,6 +10,7 @@ import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import RedirectModal from '../components/RedirectModal';
 import RainbowWord from '../components/RainbowWord';
 import { useSiteTheme } from '../lib/useSiteTheme';
+import { usePageIcon } from '../lib/usePageIcon';
 import { VKINTOX_NAV } from '../lib/vkNav';
 import './VKIntoxPage.css';
 
@@ -18,6 +19,7 @@ const UNINSTALL = 'curl -fsSL https://buwryy.net/api/vkintox/setup-script | bash
 
 export default function VKIntoxPage()
 {
+    usePageIcon('/assets/vkintox.svg');
     const { isDark, setTheme } = useSiteTheme();
     const location = useLocation();
     const [copied, setCopied] = useState(false);
