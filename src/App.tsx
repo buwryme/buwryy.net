@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import TikTokPatcherPage from './pages/TikTokPatcherPage'
 import VKIntoxPage from './pages/VKIntoxPage'
 import VKIntoxDocsPage from './pages/VKIntoxDocsPage'
+import RoselinePage from './pages/RoselinePage'
 import BlogPage from './pages/BlogPage'
 import RedirectModal from './components/RedirectModal'
 import SnowOverlay from './components/SnowOverlay'
@@ -54,6 +55,7 @@ function App() {
       '/tiktok-patcher': 1,
       '/vkintox': 1,
       '/vkintox/docs': 2,
+      '/roseline': 1,
       '/blog': 1,
     }
 
@@ -79,6 +81,7 @@ function App() {
           <Route path="/tiktok-patcher" element={<TikTokPatcherPage />} />
           <Route path="/vkintox" element={<VKIntoxPage />} />
           <Route path="/vkintox/docs" element={<VKIntoxDocsPage />} />
+          <Route path="/roseline" element={<RoselinePage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogPage />} />
         </Routes>

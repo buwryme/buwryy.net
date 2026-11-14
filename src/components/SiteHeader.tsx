@@ -6,7 +6,7 @@ export interface HeaderNavItem {
     label: string;
     to: string;
     external?: boolean;
-    icon?: 'vkintox' | 'github' | 'tiktok';
+    icon?: 'vkintox' | 'roseline' | 'github' | 'tiktok';
     symbol?: string;
     iconOnly?: boolean;
     confirmExternal?: boolean;
@@ -36,7 +36,7 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
         height: 0,
         visible: false,
     });
-    const [githubOpen, setGithubOpen] = useState(false);
+    const [confirmLink, setConfirmLink] = useState<string | null>(null);
 
     const buttonStyle = (active: boolean) => ({
         display: 'inline-flex',
@@ -55,7 +55,7 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
         fontSize: '14px',
     } as const);
 
-    const closeGithub = () => setGithubOpen(false);
+    const closeConfirm = () => setConfirmLink(null);
 
     const iconFor = (item: HeaderNavItem) => {
         if (item.symbol)
@@ -66,6 +66,11 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
         if (item.icon === 'vkintox')
         {
             return <img src="/assets/vkintox.svg" alt="" width={22} height={22} className="header-nav-image" />;
+        }
+
+        if (item.icon === 'roseline')
+        {
+            return <img src="/assets/roseline.svg" alt="" width={22} height={22} className="header-nav-image" />;
         }
 
         if (item.icon === 'tiktok')
@@ -206,7 +211,7 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
                                         key={item.label}
                                         type="button"
                                         className={className}
-                                        onClick={() => setGithubOpen(true)}
+                                        onClick={() => setConfirmLink(item.to)}
                                         aria-label={item.label}
                                         style={item.icon === 'github' ? { color: isDark ? '#fff' : '#000' } : undefined}
                                     >
@@ -283,12 +288,14 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
                 </div>
             </header>
 
-            <RedirectModal
-                isOpen={githubOpen}
-                onClose={closeGithub}
-                destination="github"
-                url="https://github.com/VKIntox/VKIntox"
-            />
+            {confirmLink && (
+                <RedirectModal
+                    isOpen
+                    onClose={closeConfirm}
+                    destination="github"
+                    url={confirmLink}
+                />
+            )}
         </>
     );
 }
