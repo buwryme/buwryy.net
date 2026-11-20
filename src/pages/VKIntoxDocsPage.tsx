@@ -183,7 +183,7 @@ export default function VKIntoxDocsPage()
                                 ))}
                             </nav>
                             <div className="vk-docs-nav-meta">
-                                <span>v0.2.2-preview.1</span>
+                                <span>v0.2.2</span>
                                 <a href="https://github.com/VKIntox/VKIntox" target="_blank" rel="noopener">source on github</a>
                             </div>
                         </aside>
@@ -202,7 +202,7 @@ export default function VKIntoxDocsPage()
                                     in-game overlay. This documentation covers... pretty much everything.
                                 </p>
                                 <div className="vk-docs-meta">
-                                    <span>v0.2.2-preview.1</span>
+                                    <span>v0.2.2</span>
                                     <span>x86_64 · aarch64</span>
                                     <span>GPL-3.0-or-later</span>
                                     <span>beta</span>
@@ -287,6 +287,14 @@ export default function VKIntoxDocsPage()
                                     <code>./setup</code>. Every prompt has a default, so pressing enter through
                                     it is fine.
                                 </p>
+                                <p>
+                                    The installer detects x86_64 or aarch64 automatically. The version picker
+                                    includes preview builds. Non-interactive flags are <code>--system</code>,{' '}
+                                    <code>--flatpak</code> with <code>--app &lt;id&gt;</code>,{' '}
+                                    <code>--version &lt;tag&gt;</code> or <code>--latest</code>,{' '}
+                                    <code>--effects</code> or <code>--no-effects</code>, <code>--yes</code>,{' '}
+                                    <code>--reinstall</code>, and <code>--dry-run</code>.
+                                </p>
                                 <CopyBlock code={INSTALL} label="install" />
                                 <p>
                                     Uninstalling removes the installed layer and its manifest. It leaves your
@@ -337,10 +345,10 @@ export default function VKIntoxDocsPage()
                                     <h2>The overlay</h2>
                                 </div>
                                 <p>
-                                    <span className="vk-kbd">home</span> opens the window. It is resizable and
-                                    movable, right-click the title bar to drag it, and it is anchored to the game
-                                    framebuffer rather than the desktop. Everything below lives behind the top
-                                    navigation.
+                                    <span className="vk-kbd">home</span> opens the window. It is resizable from
+                                    any corner and movable, right-click the title bar to drag it, it remembers
+                                    its last position, and it is anchored to the game framebuffer rather than the
+                                    desktop. Everything below lives behind the top navigation.
                                 </p>
                                 <div className="vk-docs-table-wrap">
                                     <table>
@@ -360,6 +368,13 @@ export default function VKIntoxDocsPage()
                                     </table>
                                 </div>
                                 <p>
+                                    The effect list ends in a floating Apply bar. It holds Apply, a Show FPS
+                                    toggle, and auto-apply. Auto-apply is on by default and waits 200 ms after
+                                    the last edit; turn it off to use the Apply button. The FPS pill can be
+                                    pinned to any screen corner, with optional 1% and 0.1% lows. Diagnostics
+                                    reads the same frame timing.
+                                </p>
+                                <p>
                                     The theme editor takes a seed colour, a Material 3 variant, contrast, and a
                                     light or dark base, then lets you edit every colour role, density, and
                                     corner scale. Matugen themes hot-reload. It is a lot of knobs, and all of
@@ -371,10 +386,14 @@ export default function VKIntoxDocsPage()
                                     and 1 to 10 passes are exposed.
                                 </p>
                                 <p>
-                                    On X11 the overlay takes a pointer grab while the cursor is over it, and a
-                                    keyboard grab only while it is consuming keys. On Wayland, popups withhold
-                                    input so clicks do not leak into the game. Games that bypass SDL or GLFW for
-                                    input can still defeat that blocking.
+                                    On X11, clicks and motion over the overlay are blocked by invisible
+                                    input-only windows instead of pointer grabs, so Wine games keep their
+                                    cursor capture. The keyboard is grabbed only while the overlay is consuming
+                                    keys, and a stalled frame releases it automatically. Wayland tracks hovers
+                                    from the overlay's capture surface and uses the same keyboard handoff.
+                                    Turning <code>block input while the overlay is open</code> off applies
+                                    immediately. Games that bypass SDL or GLFW for input can still defeat that
+                                    blocking.
                                 </p>
                             </section>
 
@@ -398,6 +417,17 @@ export default function VKIntoxDocsPage()
                                     repository. That package carries the built-in shaders: IntoxSSR, IntoxMXAO,
                                     IntoxDepthColorCorrection, MSAA, ExponentialFog, and IntoxRimlight.
                                 </p>
+                                <p>
+                                    Expensive effects can render below output resolution, static uniforms are
+                                    skipped, and parameters bake into a stable form once editing stops. SSR and
+                                    MXAO expose render-size scaling directly.
+                                </p>
+                                <p>
+                                    FX-Over-UI is on by default for Sober and Roséline. It feeds effects the
+                                    HUD-free scene and draws them under the game's HUD, so Roblox's interface and
+                                    MangoHud stay untouched. Other games can toggle it, but the path is built
+                                    around Roblox's renderer and may flicker.
+                                </p>
                                 <ul>
                                     <li>Effects can be enabled, disabled, duplicated, and reordered in the main view.</li>
                                     <li>Parameters are edited inline and saved into the active preset.</li>
@@ -420,7 +450,10 @@ export default function VKIntoxDocsPage()
                                     Depth capture is on by default, so depth effects work on a game's first
                                     launch without a restart. VKIntox tracks depth images as the game creates and
                                     uses them, then copies the right one before the frame is presented. MSAA
-                                    depth goes through a resolve pass; single-sample depth is copied directly.
+                                    depth uses the selected resolve mode: <code>auto</code> prefers the average
+                                    resolve, <code>sample-zero</code> reads sample 0 and skips the average
+                                    resolve, and <code>average</code> forces it. Single-sample depth is copied
+                                    directly.
                                 </p>
                                 <div className="vk-docs-table-wrap">
                                     <table>
@@ -435,16 +468,18 @@ export default function VKIntoxDocsPage()
                                     </table>
                                 </div>
                                 <p>
-                                    The default is <code>queue-submit</code>, because it survives more engine
-                                    layouts. Switch to <code>renderpass-end</code> when a game exposes depth
-                                    cleanly and you want the earliest possible copy. If AO or SSR looks like it is
-                                    reading the wrong plane, flip the invert toggle first, then pin the actual
-                                    depth view in the advanced tab.
+                                    The default capture method is <code>queue-submit</code>, because it survives
+                                    more engine layouts; the default resolve mode is <code>sample-zero</code>.
+                                    Switch to <code>renderpass-end</code> when a game exposes depth cleanly and
+                                    you want the earliest possible copy. If AO or SSR looks like it is reading
+                                    the wrong plane, flip the invert toggle first, then pin the actual depth view
+                                    in the advanced tab. Depth method and rebuild changes apply safely.
                                 </p>
                                 <p>
-                                    Sober and rosemary start with inverted depth because their depth reads that
-                                    way. Other games default to normal orientation. The choice is stored per game,
-                                    so a fix applies to one executable and does not follow you to the next.
+                                    Sober, Rosemary, Roséline and Butter start with inverted depth because their
+                                    depth reads that way. mldr starts flipped. Other games default to normal
+                                    orientation. The choice is stored per game, so a fix applies to one
+                                    executable and does not follow you to the next.
                                 </p>
                             </section>
 
@@ -557,8 +592,7 @@ export default function VKIntoxDocsPage()
                                 <p>
                                     On x86_64, <code>scripts/arm64-smoke.sh</code> cross-checks an aarch64 build
                                     through podman and qemu-user. Release builds for aarch64 run natively on ARM
-                                    runners except for the Arch and Debian packages, which are built in emulated
-                                    containers.
+                                    runners.
                                 </p>
                                 <p>
                                     To compile the shader packages without launching a game:
@@ -620,9 +654,10 @@ export default function VKIntoxDocsPage()
                                 <h3>Remote</h3>
                                 <p>
                                     The remote setup script is served from <code>scripts/setup</code>. It
-                                    installs the <code>.fx</code> shaders from <code>EffectPackages.ini</code>.
-                                    The rest is self explanatory. For Flatpak installs, Sober and Roseline are
-                                    preferred.
+                                    installs the <code>.fx</code> shaders from <code>EffectPackages.ini</code>,
+                                    detects x86_64 or aarch64, and can install preview releases from the version
+                                    picker. The rest is self explanatory. For Flatpak installs, Sober and
+                                    Roseline are preferred.
                                 </p>
                                 <CopyBlock code={INSTALL} label="remote install" />
                                 <CopyBlock code={UNINSTALL} label="remote uninstall" />
@@ -647,6 +682,11 @@ export default function VKIntoxDocsPage()
                                     integration. This is mostly faster than compiling manually.
                                 </p>
                                 <CopyBlock code={LOCAL_SETUP} label="local install" />
+                                <p>
+                                    Every local target also accepts <code>uninstall</code>, for example{' '}
+                                    <code>./setup system uninstall</code>. It removes the layer and leaves the
+                                    config alone.
+                                </p>
                             </section>
 
                             <section className="vk-docs-section" id="ci">
@@ -655,8 +695,8 @@ export default function VKIntoxDocsPage()
                                     <h2>Continuous integration</h2>
                                 </div>
                                 <p>
-                                    <code>.github/workflows/ci.yml</code> runs on pushes to main, master, and
-                                    v0.1.3-experimental, and on pull requests, when build inputs change. There are                                    two jobs: x86_64 on Ubuntu 26.04 and aarch64 on Ubuntu 24.04 ARM.
+                                    <code>.github/workflows/ci.yml</code> runs two jobs: x86_64 on Ubuntu 26.04
+                                    and aarch64 on Ubuntu 24.04 ARM.
                                 </p>
                                 <p>
                                     Each job installs the same dependencies as a local build, configures Meson with
@@ -721,9 +761,9 @@ export default function VKIntoxDocsPage()
                                             <tr><th>package</th><th>architectures</th><th>format</th></tr>
                                         </thead>
                                         <tbody>
-                                            <tr><td>Arch</td><td>x86_64, aarch64 (emulated)</td><td><code>.pkg.tar.zst</code></td></tr>
+                                            <tr><td>Arch</td><td>x86_64, aarch64</td><td><code>.pkg.tar.zst</code></td></tr>
                                             <tr><td>Fedora and openSUSE RPM</td><td>x86_64, aarch64</td><td><code>.rpm</code></td></tr>
-                                            <tr><td>Debian</td><td>x86_64, aarch64 (emulated)</td><td><code>.deb</code></td></tr>
+                                            <tr><td>Debian</td><td>x86_64, aarch64</td><td><code>.deb</code></td></tr>
                                             <tr><td>Flatpak</td><td>x86_64, aarch64</td><td><code>.flatpak</code></td></tr>
                                             <tr><td>Nix</td><td>x86_64, aarch64</td><td><code>.tar.xz</code></td></tr>
                                         </tbody>
@@ -736,14 +776,15 @@ export default function VKIntoxDocsPage()
                                     earlier runs, but the release still validates the complete set before
                                     publishing.
                                 </p>
+                                <p>
+                                    Preview tags publish as GitHub pre-releases. Stable tags publish as the latest
+                                    release.
+                                </p>
                                 <Callout kind="caution">
                                     <p>
                                         The workflow uses <code>RELEASE_TOKEN</code> when configured, falling
                                         back to the default token. The built-in token cannot create tags or
                                         releases for a commit that touched workflow files.
-                                    </p>
-                                    <p>
-                                        ARM64 builds might not even build properly yet, not for all distros.
                                     </p>
                                 </Callout>
                             </section>
@@ -756,16 +797,16 @@ export default function VKIntoxDocsPage()
                                 <p>
                                     <code>VERSION</code> at the repository root is the source of truth. It holds
                                     the full tag, including the <code>v</code>, for example{' '}
-                                    <code>v0.2.2-preview.1</code>. Meson compiles that string into the library, so
-                                    the About tab reports the build it is actually running.
+                                    <code>v0.2.2</code>. Meson compiles that string into the library, so the
+                                    About tab reports the build it is actually running.
                                 </p>
                                 <p>
                                     Tags follow <code>vX.Y.Z</code> for a stable release and{' '}
                                     <code>vX.Y.Z-preview.N</code> for a preview. The tag keeps the machine form.
-                                    The release title spells a preview out, so <code>v0.2.2-preview.1</code>
-                                    becomes <code>VKIntox v0.2.2 Preview 1</code>. Package versions replace the
+                                    The release title spells a preview out, so <code>v0.2.2-preview.3</code>
+                                    becomes <code>VKIntox v0.2.2 Preview 3</code>. Package versions replace the
                                     hyphen with an underscore where the package manager forbids it, which is why
-                                    Arch and RPM artifacts read <code>0.2.2_preview.1</code>.
+                                    Arch and RPM preview artifacts read <code>0.2.2_preview.3</code>.
                                 </p>
                                 <p>
                                     Release notes live in <code>docs/releases/</code> and are required. To ship a
@@ -815,10 +856,9 @@ export default function VKIntoxDocsPage()
                                     implementation of Material 3. Also features background blur.
                                 </p>
                                 <p>
-                                    The layer also has a HUD protection path (FX-Over-UI?). When available,
-                                    the effects get fed an HUD-free scene, and effects draw under the HUD.
-                                    This may cause some flickering. Code assumes Roblox's render pathway, but
-                                    doesn't necessarily fire when the game is likely unsupported.
+                                    The layer also has a HUD protection path, FX-Over-UI, described in the
+                                    Effects section. It is built around Roblox's renderer and is enabled by
+                                    default for Sober and Roséline.
                                 </p>
                             </section>
 
@@ -869,14 +909,13 @@ export default function VKIntoxDocsPage()
                                     <li>Wrong depth orientation: try messing around with Invert/Flip/Mirror and switch between View Space Z and Red/Luminance.</li>
                                     <li>Still wrong? Try pinning a depth buffer manually.</li>
                                     <li>Flatpak app ignores the layer / update didn't apply: ensure your app uses the 26.08 branch of the FreeDesktop Runtime, run <code>flatpak update</code>, and for updates, reboot.</li>
-                                    <li>Input leaks into the game: this could be a game-specific issue. Note that <strong>only</strong> mouse blocking functions, whereas keyboard input still goes through.</li>
+                                    <li>Input leaks into the game: this is usually a game-specific input path. X11 and Wayland block clicks and motion over the overlay and grab the keyboard only while the overlay consumes keys. Games that bypass SDL or GLFW can still leak input.</li>
                                     <li>Wine/Proton games are not widely tested, but are considered working well enough. Be careful when using VKIntox with anti-cheat games (whether it be Wine or not), the responsibility is on you. However, no ban has been recorded yet.</li>
                                 </ul>
                                 <Callout kind="key" label="reporting issues">
                                     For opening issues, please include your <strong>debug</strong> logs and a
                                     frame dump. This is usually enough. More information may be required,
-                                    such as your GPU, Linux Distro, CPU architecture (...arm64 is
-                                    experimental) and etc...
+                                    such as your GPU, Linux distribution, CPU architecture, and install method.
                                 </Callout>
                             </section>
 

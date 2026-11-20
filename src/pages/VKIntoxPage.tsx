@@ -239,7 +239,7 @@ export default function VKIntoxPage()
                             </div>
                         </section>
 
-                        <p className="vk-beta-note">VKIntox is still in its beta stage. You can file bug reports. This doesn't mean it isn't usable.</p>
+                        <p className="vk-beta-note">VKIntox v0.2.2 is still in its beta stage. You can file bug reports. This doesn't mean it isn't usable.</p>
                     </main>
 
                     <Footer
