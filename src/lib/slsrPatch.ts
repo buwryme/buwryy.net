@@ -7,10 +7,10 @@
  */
 
 const CONTAINERS = new Set(['moov', 'trak', 'mdia', 'minf', 'stbl', 'edts', 'dinf']);
-const AAC_RATES = [96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350];
+export const AAC_RATES = [96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350];
 const SILENT_FRAME = new Uint8Array([33, 16, 4, 96, 140, 28]);
 
-function u32(data: Uint8Array, offset: number): number {
+export function u32(data: Uint8Array, offset: number): number {
   return (
     ((data[offset] << 24) |
       (data[offset + 1] << 16) |
@@ -20,13 +20,13 @@ function u32(data: Uint8Array, offset: number): number {
   );
 }
 
-function u64(data: Uint8Array, offset: number): number {
+export function u64(data: Uint8Array, offset: number): number {
   const value = u32(data, offset) * 0x100000000 + u32(data, offset + 4);
   if (!Number.isSafeInteger(value)) throw new Error('unsupported 64-bit value');
   return value;
 }
 
-function p32(value: number): Uint8Array {
+export function p32(value: number): Uint8Array {
   return new Uint8Array([
     (value >>> 24) & 0xff,
     (value >>> 16) & 0xff,
@@ -35,14 +35,14 @@ function p32(value: number): Uint8Array {
   ]);
 }
 
-function p64(value: number): Uint8Array {
+export function p64(value: number): Uint8Array {
   const output = new Uint8Array(8);
   output.set(p32(Math.floor(value / 0x100000000)), 0);
   output.set(p32(value >>> 0), 4);
   return output;
 }
 
-function concat(parts: Uint8Array[]): Uint8Array {
+export function concat(parts: Uint8Array[]): Uint8Array {
   const length = parts.reduce((sum, part) => sum + part.length, 0);
   const output = new Uint8Array(length);
   let offset = 0;
@@ -53,12 +53,15 @@ function concat(parts: Uint8Array[]): Uint8Array {
   return output;
 }
 
-function box(name: string, payload: Uint8Array): Uint8Array {
-  const type = new TextEncoder().encode(name);
+export function boxWithType(type: Uint8Array, payload: Uint8Array): Uint8Array {
   return concat([p32(payload.length + 8), type, payload]);
 }
 
-interface Box {
+export function box(name: string, payload: Uint8Array): Uint8Array {
+  return boxWithType(new TextEncoder().encode(name), payload);
+}
+
+export interface Box {
   name: string;
   data: Uint8Array;
   raw: Uint8Array | null;
@@ -72,7 +75,7 @@ interface Header {
   zero: boolean;
 }
 
-function readHeader(data: Uint8Array, available: number): Header {
+export function readHeader(data: Uint8Array, available: number): Header {
   if (data.length < 8) throw new Error('truncated MP4 header');
   const declared = u32(data, 0);
   const header = declared === 1 ? 16 : 8;
@@ -87,7 +90,7 @@ function readHeader(data: Uint8Array, available: number): Header {
   };
 }
 
-function parseBoxes(data: Uint8Array, depth = 0): Box[] {
+export function parseBoxes(data: Uint8Array, depth = 0): Box[] {
   if (depth >= 16) throw new Error('excessive MP4 nesting');
   const output: Box[] = [];
   let pos = 0;
@@ -106,7 +109,7 @@ function parseBoxes(data: Uint8Array, depth = 0): Box[] {
   return output;
 }
 
-function serializeBox(item: Box): Uint8Array {
+export function serializeBox(item: Box): Uint8Array {
   if (item.children) {
     return box(item.name, concat(item.children.map(serializeBox)));
   }
@@ -114,22 +117,22 @@ function serializeBox(item: Box): Uint8Array {
   return box(item.name, item.data);
 }
 
-function child(item: Box, name: string): Box {
+export function child(item: Box, name: string): Box {
   const found = item.children?.find((entry) => entry.name === name);
   if (!found) throw new Error(`missing MP4 box: ${name}`);
   return found;
 }
 
-function findChild(item: Box, name: string): Box | null {
+export function findChild(item: Box, name: string): Box | null {
   return item.children?.find((entry) => entry.name === name) ?? null;
 }
 
-function setData(item: Box, data: Uint8Array): void {
+export function setData(item: Box, data: Uint8Array): void {
   item.data = data;
   item.raw = null;
 }
 
-function readInt(data: Uint8Array, offset: number, width: number): number {
+export function readInt(data: Uint8Array, offset: number, width: number): number {
   return width === 8 ? u64(data, offset) : u32(data, offset);
 }
 
@@ -148,7 +151,7 @@ interface Descriptor {
   end: number;
 }
 
-function descriptor(data: Uint8Array, start: number): Descriptor {
+export function descriptor(data: Uint8Array, start: number): Descriptor {
   if (start >= data.length) throw new Error('missing descriptor');
   const tag = data[start];
   let pos = start + 1;
@@ -285,7 +288,7 @@ function patchAudioDescription(stsd: Box): { rate: number; patched: Uint8Array }
   };
 }
 
-function tableCount(item: Box, stride: number): number {
+export function tableCount(item: Box, stride: number): number {
   if (item.data.length < 8 || u32(item.data, 0) !== 0) {
     throw new Error(`invalid ${item.name} table`);
   }

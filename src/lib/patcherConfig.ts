@@ -12,7 +12,7 @@ export interface PatchConfig {
   dummySampleSize: number;
   trailingBytes: number;
   dummySizes: Record<string, number>;
-  method: 'slsr' | 'mvhd' | 'legacy';
+  method: 'obx' | 'slsr' | 'mvhd' | 'legacy';
 }
 
 const GIST_API_URL =
@@ -35,7 +35,7 @@ name_box_payload = "buwryy<3"
 inflation_rate = 10
 dummy_sample_size = 8
 trailing_bytes = 184100
-method = "slsr"
+method = "obx"
 
 [patcher.dummy_sizes]
 avc1 = 8
@@ -126,7 +126,9 @@ function normalize(raw: TomlValue): PatchConfig {
       ? 'legacy'
       : patcher.method === 'mvhd'
         ? 'mvhd'
-        : 'slsr',
+        : patcher.method === 'slsr'
+          ? 'slsr'
+          : 'obx',
   };
 }
 

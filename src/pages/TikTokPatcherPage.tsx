@@ -10,6 +10,7 @@ import Toast from '../components/Toast';
 import { DEFAULT_CONFIG, loadPatcherConfig, type PatchConfig } from '../lib/patcherConfig';
 import { patchMvhd } from '../lib/mvhdPatch';
 import { patchSlSr } from '../lib/slsrPatch';
+import { patchObx } from '../lib/obxPatch';
 
 const PATCHER_STATUS_URL = 'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/tiktok-patcher-status';
 
@@ -211,13 +212,15 @@ export default function TikTokPatcherPage() {
       addLog(`input file size: ${(fileData.length / 1024 / 1024).toFixed(2)} MB`);
 
       if (
-        (config.method === 'slsr' || config.method === 'mvhd') &&
+        (config.method === 'obx' || config.method === 'slsr' || config.method === 'mvhd') &&
         selectedFile.name.toLowerCase().endsWith('.mp4')
       ) {
         addLog('patching original MP4 container directly...');
-        const patched = config.method === 'slsr'
-          ? patchSlSr(new Uint8Array(fileData))
-          : patchMvhd(new Uint8Array(fileData));
+        const patched = config.method === 'obx'
+          ? patchObx(new Uint8Array(fileData))
+          : config.method === 'slsr'
+            ? patchSlSr(new Uint8Array(fileData))
+            : patchMvhd(new Uint8Array(fileData));
         addLog(`patched file size: ${(patched.length / 1024 / 1024).toFixed(2)} MB`);
         setProgress(100);
         const outputFileName = `${selectedFile.name.replace(/\.[^/.]+$/, '')}_tiktok.mp4`;
@@ -259,11 +262,13 @@ export default function TikTokPatcherPage() {
       if (firstBoxType !== 'ftyp') throw new Error(`invalid MP4 structure: expected ftyp, got ${firstBoxType}`);
 
       addLog('patching mp4 structure...');
-      const patched = config.method === 'slsr'
-        ? patchSlSr(outputArray)
-        : config.method === 'mvhd'
-          ? patchMvhd(outputArray)
-          : patchMP4(outputArray, config, fileData);
+      const patched = config.method === 'obx'
+        ? patchObx(outputArray)
+        : config.method === 'slsr'
+          ? patchSlSr(outputArray)
+          : config.method === 'mvhd'
+            ? patchMvhd(outputArray)
+            : patchMP4(outputArray, config, fileData);
       addLog(`patched file size: ${(patched.length / 1024 / 1024).toFixed(2)} MB`);
 
       if (patched.length === 0) throw new Error('patched file is empty');
@@ -1301,18 +1306,18 @@ export default function TikTokPatcherPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>graphic_eq</span>
                   <div>
-                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>silent audio tail</p>
+                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>four-sample audio tail</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      a short run of silent AAC frames is appended, and the audio track, movie duration, and edit list are extended by the same amount.
+                      the last four audio samples are replaced with the method tail. if they are too small, a new media box is appended and the audio tables are rebuilt.
                     </p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--md-primary)', marginTop: '2px' }}>queue_music</span>
                   <div>
-                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>duplicated audio track</p>
+                    <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>audio table rewrite</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      a second AAC-LC stereo track with a patched audio configuration is added next to the original one. both tracks share the same sample layout.
+                      chunk offsets, sample sizes, and sample-to-chunk runs are rewritten so the tail samples sit at the end of the audio track.
                     </p>
                   </div>
                 </div>
@@ -1330,7 +1335,7 @@ export default function TikTokPatcherPage() {
                   <div>
                     <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>implementation details</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      see the <strong><a href="https://github.com/buwryme/buwryy.net/blob/main/src/lib/slsrPatch.ts" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>silent-tail implementation</a></strong>. the older header-only method remains available with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "mvhd"</code>, and the audio-inflation method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "legacy"</code>.
+                      see the <strong><a href="https://github.com/buwryme/buwryy.net/blob/main/src/lib/obxPatch.ts" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>obx implementation</a></strong>. the older silent-tail method remains available with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "slsr"</code>, the header-only method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "mvhd"</code>, and the audio-inflation method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "legacy"</code>.
                     </p>
                   </div>
                 </div>
