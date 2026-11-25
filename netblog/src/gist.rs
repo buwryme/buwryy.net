@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::io::Write;
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 use serde::Deserialize;
@@ -8,8 +9,9 @@ use serde_json::{Value, json};
 
 use crate::model::Post;
 
-pub const DEFAULT_GIST_ID: &str = "e3844adacb4cf4ed14bccb649b4eb688";
+pub const DEFAULT_GIST_ID: &str = "603ba845a1dc45e4bc53a81d72114ffa";
 pub const BLOG_FILE: &str = "blog.json";
+const DEFAULT_INSTANCE: &str = "https://gist.buwryy.net";
 
 #[derive(Debug, Clone)]
 pub struct Snapshot {
@@ -74,14 +76,56 @@ pub fn gist_id() -> String {
 }
 
 pub fn gist_url() -> String {
-    format!("https://gist.github.com/{}", gist_id())
+    format!("{}/buwryy/{}", instance_url(), gist_id())
+}
+
+fn instance_url() -> String {
+    std::env::var("NETBLOG_OPENGIST_URL")
+        .ok()
+        .map(|value| value.trim().trim_end_matches('/').to_string())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| DEFAULT_INSTANCE.to_string())
+}
+
+fn api_url() -> String {
+    format!("{}/api/gists/{}", instance_url(), gist_id())
+}
+
+fn token() -> Result<String, GistError> {
+    if let Ok(value) = std::env::var("NETBLOG_OPENGIST_TOKEN") {
+        let value = value.trim().to_string();
+        if !value.is_empty() {
+            return Ok(value);
+        }
+    }
+
+    let config_dir = std::env::var("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| {
+            PathBuf::from(std::env::var("HOME").unwrap_or_default()).join(".config")
+        });
+    let path = config_dir.join("opengist").join("api-token");
+
+    std::fs::read_to_string(&path)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| {
+            GistError::with_detail(
+                "No Opengist access token was found.",
+                format!(
+                    "Set NETBLOG_OPENGIST_TOKEN, or save a token in {}.",
+                    path.display()
+                ),
+            )
+        })
 }
 
 pub fn load() -> Result<Snapshot, GistError> {
-    let output = run_gh(&["api", &format!("gists/{}", gist_id())], None)?;
+    let output = run_curl("GET", &api_url(), None)?;
     let response: GistResponse = serde_json::from_str(&output).map_err(|error| {
         GistError::with_detail(
-            "GitHub returned something Netblog could not read.",
+            "Opengist returned something Netblog could not read.",
             error.to_string(),
         )
     })?;
@@ -93,7 +137,7 @@ pub fn load() -> Result<Snapshot, GistError> {
 
     if file.truncated {
         return Err(GistError::new(
-            "The gist file is too large for the GitHub API to return in full.",
+            "The gist file is too large for the Opengist API to return in full.",
         ));
     }
 
@@ -150,17 +194,7 @@ pub fn save(posts: &[Post]) -> Result<Snapshot, GistError> {
         GistError::with_detail("Could not encode the gist request.", error.to_string())
     })?;
 
-    let output = run_gh(
-        &[
-            "api",
-            "--method",
-            "PATCH",
-            &format!("gists/{}", gist_id()),
-            "--input",
-            "-",
-        ],
-        Some(&body),
-    )?;
+    let output = run_curl("PATCH", &api_url(), Some(&body))?;
 
     let updated_at = serde_json::from_str::<GistResponse>(&output)
         .ok()
@@ -172,17 +206,33 @@ pub fn save(posts: &[Post]) -> Result<Snapshot, GistError> {
     })
 }
 
-fn run_gh(arguments: &[&str], stdin: Option<&[u8]>) -> Result<String, GistError> {
-    let mut command = Command::new("gh");
+fn run_curl(method: &str, url: &str, stdin: Option<&[u8]>) -> Result<String, GistError> {
+    let token = token()?;
+    let auth = format!("Authorization: Bearer {token}");
+
+    let mut command = Command::new("curl");
     command
-        .args(arguments)
-        .env("GH_PROMPT_DISABLED", "1")
+        .args([
+            "--silent",
+            "--show-error",
+            "--fail-with-body",
+            "--request",
+            method,
+            "--header",
+            &auth,
+            "--header",
+            "Content-Type: application/json",
+            "--url",
+            url,
+        ])
         .env("NO_COLOR", "1")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
 
     if stdin.is_some() {
-        command.stdin(Stdio::piped());
+        command
+            .args(["--data-binary", "@-"])
+            .stdin(Stdio::piped());
     } else {
         command.stdin(Stdio::null());
     }
@@ -190,11 +240,11 @@ fn run_gh(arguments: &[&str], stdin: Option<&[u8]>) -> Result<String, GistError>
     let mut child = command.spawn().map_err(|error| {
         if error.kind() == std::io::ErrorKind::NotFound {
             GistError::with_detail(
-                "GitHub CLI (gh) is not installed.",
-                "Install gh, then run: gh auth login",
+                "curl is not installed.",
+                "Install curl with your package manager, then try again.",
             )
         } else {
-            GistError::with_detail("Could not start GitHub CLI (gh).", error.to_string())
+            GistError::with_detail("Could not start curl.", error.to_string())
         }
     })?;
 
@@ -202,34 +252,35 @@ fn run_gh(arguments: &[&str], stdin: Option<&[u8]>) -> Result<String, GistError>
         let mut handle = child
             .stdin
             .take()
-            .ok_or_else(|| GistError::new("Could not open gh's input stream."))?;
+            .ok_or_else(|| GistError::new("Could not open curl's input stream."))?;
         handle.write_all(input).map_err(|error| {
-            GistError::with_detail("Could not send the request to gh.", error.to_string())
+            GistError::with_detail("Could not send the request to curl.", error.to_string())
         })?;
     }
 
     let output = child.wait_with_output().map_err(|error| {
-        GistError::with_detail("Could not finish the gh request.", error.to_string())
+        GistError::with_detail("Could not finish the curl request.", error.to_string())
     })?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-        let hint = if stderr.to_lowercase().contains("auth")
-            || stderr.to_lowercase().contains("logged in")
-            || stderr.to_lowercase().contains("token")
-        {
-            Some("Run gh auth login in a terminal, then try again.".to_string())
+        let body = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        let detail = if stderr.is_empty() { body } else { stderr };
+        let message = if detail.contains("401") || detail.to_lowercase().contains("unauthorized") {
+            "Opengist rejected the access token.".to_string()
+        } else if detail.contains("403") {
+            "The access token cannot write this gist.".to_string()
+        } else if detail.contains("404") {
+            "The gist was not found on Opengist.".to_string()
         } else {
-            None
+            "Opengist could not complete the request.".to_string()
         };
-        let message =
-            hint.unwrap_or_else(|| "GitHub CLI could not complete the request.".to_string());
-        return Err(GistError::with_detail(message, stderr));
+        return Err(GistError::with_detail(message, detail));
     }
 
     String::from_utf8(output.stdout).map_err(|error| {
         GistError::with_detail(
-            "gh returned text that is not valid UTF-8.",
+            "curl returned text that is not valid UTF-8.",
             error.to_string(),
         )
     })

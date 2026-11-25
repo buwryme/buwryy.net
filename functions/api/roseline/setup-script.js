@@ -1,5 +1,5 @@
 const SETUP_SCRIPT =
-  'https://raw.githubusercontent.com/buwryme/Roseline/main/scripts/setup.sh';
+  'https://git.buwryy.net/buwryy/Roseline/raw/branch/main/scripts/setup.sh';
 
 export function onRequestGet() {
   return new Response(null, {

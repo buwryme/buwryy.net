@@ -1,5 +1,5 @@
 const SETUP_SCRIPT =
-  'https://raw.githubusercontent.com/VKIntox/VKIntox/refs/heads/main/scripts/setup';
+  'https://git.buwryy.net/VKIntox/VKIntox/raw/branch/main/scripts/setup';
 
 export function onRequestGet() {
   return new Response(null, {

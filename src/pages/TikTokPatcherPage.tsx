@@ -12,7 +12,7 @@ import { patchMvhd } from '../lib/mvhdPatch';
 import { patchSlSr } from '../lib/slsrPatch';
 import { patchObx } from '../lib/obxPatch';
 
-const PATCHER_STATUS_URL = 'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/tiktok-patcher-status';
+const PATCHER_STATUS_URL = 'https://gist.buwryy.net/buwryy/7832535a24564e5d8356f99166dd6c5c/raw/HEAD/tiktok-patcher-status';
 
 export default function TikTokPatcherPage() {
   const navigate = useNavigate();
@@ -1183,7 +1183,7 @@ export default function TikTokPatcherPage() {
                   patch videos for lossless tiktok uploads
                 </p>
                 <p className="m3-body-small" style={{ color: 'var(--md-outline)', margin: '4px 0 0 0', fontSize: '12px' }}>
-                  derived from <Link to="https://github.com/buwryme/tikutils" style={{ color: 'var(--md-primary)', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">TikUtils</Link>.<br />
+                  derived from <Link to="https://git.buwryy.net/buwryy/tikutils" style={{ color: 'var(--md-primary)', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">TikUtils</Link>.<br />
                   runs fully locally!
                 </p>
               </div>
@@ -1335,7 +1335,7 @@ export default function TikTokPatcherPage() {
                   <div>
                     <p className="m3-body-large" style={{ margin: 0, marginBottom: '4px' }}>implementation details</p>
                     <p className="m3-body-medium" style={{ margin: 0, color: 'var(--md-on-surface-variant)' }}>
-                      see the <strong><a href="https://github.com/buwryme/buwryy.net/blob/main/src/lib/obxPatch.ts" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>obx implementation</a></strong>. the older silent-tail method remains available with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "slsr"</code>, the header-only method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "mvhd"</code>, and the audio-inflation method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "legacy"</code>.
+                      see the <strong><a href="https://git.buwryy.net/buwryy/buwryy.net/src/branch/main/src/lib/obxPatch.ts" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--md-primary)', textDecoration: 'none' }}>obx implementation</a></strong>. the older silent-tail method remains available with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "slsr"</code>, the header-only method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "mvhd"</code>, and the audio-inflation method with <code style={{ fontFamily: '"Roboto Mono", monospace', fontSize: '12px', background: 'var(--md-surface-container)', padding: '2px 6px', borderRadius: '4px' }}>method = "legacy"</code>.
                     </p>
                   </div>
                 </div>

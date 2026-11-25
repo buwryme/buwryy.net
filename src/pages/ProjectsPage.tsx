@@ -15,19 +15,19 @@ interface Project {
 const projects: Project[] = [
   {
     name: 'sharptape',
-    url: 'https://github.com/buwryme/sharptape',
+    url: 'https://git.buwryy.net/buwryy/sharptape',
     description: 'topaz video ai alternative for linux. made with gtk4/libadwaita',
     iconSrc: '/assets/sharptape.svg',
   },
   {
     name: 'tikutils',
-    url: 'https://github.com/buwryme/tikutils',
+    url: 'https://git.buwryy.net/buwryy/tikutils',
     description: 'patch tiktok videos to upload losslessly & download/analyze videos. made with gtk4/libadwaita',
     iconSrc: '/assets/tikutils.svg',
   },
   {
     name: 'vkintox',
-    url: 'https://github.com/VKIntox/VKIntox',
+    url: 'https://git.buwryy.net/VKIntox/VKIntox',
     description: 'roblox shaders like reshade for sober, an android runtime for linux!',
     icon: 'sports_esports',
   },

@@ -6,7 +6,7 @@ export interface BlogPost {
     body: string;
 }
 
-const BLOG_URL = 'https://gist.githubusercontent.com/buwryme/e3844adacb4cf4ed14bccb649b4eb688/raw/blog.json';
+const BLOG_URL = 'https://gist.buwryy.net/buwryy/603ba845a1dc45e4bc53a81d72114ffa/raw/HEAD/blog.json';
 
 export async function loadPosts(): Promise<BlogPost[]> {
     const response = await fetch(`${BLOG_URL}?t=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } });

@@ -9,7 +9,7 @@
  * the moov size delta. Verified byte-for-byte against the reference output.
  */
 
-const COMMENT = 'Patched by https://github.com/buwryme/tiktok-lossless-upload';
+const COMMENT = 'Patched by https://git.buwryy.net/buwryy/tiktok-lossless-upload';
 
 function u32(data: Uint8Array, offset: number): number {
   return (

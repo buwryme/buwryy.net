@@ -246,7 +246,7 @@ impl NetblogWindow {
         let loading_page = adw::StatusPage::builder()
             .icon_name("cloud-download-symbolic")
             .title("Connecting to your gist")
-            .description("Netblog is using the GitHub CLI credentials from this machine.")
+            .description("Netblog is using your gist.buwryy.net access token.")
             .build();
         let loading_page_spinner = gtk::Spinner::new();
         loading_page_spinner.set_size_request(32, 32);
@@ -260,7 +260,7 @@ impl NetblogWindow {
         let error_page = adw::StatusPage::builder()
             .icon_name("network-error-symbolic")
             .title("Could not reach the gist")
-            .description("GitHub CLI could not load the blog.")
+            .description("Opengist could not load the blog.")
             .child(&error_retry)
             .build();
 
@@ -624,7 +624,7 @@ impl NetblogWindow {
                 self.list_stack.set_visible_child_name("empty");
                 self.list_empty.set_title("Gist unavailable");
                 self.list_empty
-                    .set_description(Some("Check gh auth and retry."));
+                    .set_description(Some("Check the Opengist access token and retry."));
                 self.update_status();
                 self.update_actions();
             }
@@ -1194,7 +1194,7 @@ impl NetblogWindow {
             self.status_label.set_text("Loading your blog...");
             self.status_dot.add_css_class("status-busy");
         } else if state.publishing {
-            self.status_label.set_text("Publishing to GitHub...");
+            self.status_label.set_text("Publishing to gist.buwryy.net...");
             self.status_dot.add_css_class("status-busy");
         } else if state.dirty {
             self.status_label.set_text("Unpublished changes");
@@ -1241,7 +1241,7 @@ impl NetblogWindow {
             .copyright("© 2026 buwryme")
             .version(env!("CARGO_PKG_VERSION"))
             .website("https://buwryy.net")
-            .issue_url("https://github.com/buwryme/buwryy.net/issues")
+            .issue_url("https://git.buwryy.net/buwryy/buwryy.net/issues")
             .license_type(gtk::License::Gpl30)
             .build();
         about.add_credit_section(

@@ -2,7 +2,7 @@
 Type=Application
 Name=Netblog
 GenericName=Blog Editor
-Comment=Edit buwryy.net posts stored in a GitHub gist
+Comment=Edit buwryy.net posts stored in a gist on gist.buwryy.net
 Exec=@BINDIR@/netblog %U
 Icon=net.buwryy.Netblog
 Terminal=false

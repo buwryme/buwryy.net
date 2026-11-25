@@ -9,8 +9,18 @@ import BlogPage from './pages/BlogPage'
 import RedirectModal from './components/RedirectModal'
 import SnowOverlay from './components/SnowOverlay'
 
+function ExternalRedirect({ to }: { to: string }) {
+  useEffect(() => {
+    window.location.replace(to)
+  }, [to])
+  return null
+}
+
 function App() {
   const location = useLocation()
+  const hostname = window.location.hostname
+  const isVKIntoxHost = hostname === 'vkintox.buwryy.net'
+  const isRoselineHost = hostname === 'roseline.buwryy.net'
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
   const [redirect, setRedirect] = useState<{ destination: string; url: string } | null>(null)
@@ -77,13 +87,25 @@ function App() {
     <>
       <div key={location.pathname} className={`page-wrapper ${isTransitioning ? 'transitioning' : ''} ${direction}`}>
         <Routes location={location}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/tiktok-patcher" element={<TikTokPatcherPage />} />
-          <Route path="/vkintox" element={<VKIntoxPage />} />
-          <Route path="/vkintox/docs" element={<VKIntoxDocsPage />} />
-          <Route path="/roseline" element={<RoselinePage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:slug" element={<BlogPage />} />
+          {isVKIntoxHost ? (
+            <>
+              <Route path="/docs" element={<VKIntoxDocsPage />} />
+              <Route path="/vkintox/docs" element={<VKIntoxDocsPage />} />
+              <Route path="*" element={<VKIntoxPage />} />
+            </>
+          ) : isRoselineHost ? (
+            <Route path="*" element={<RoselinePage />} />
+          ) : (
+            <>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/tiktok-patcher" element={<TikTokPatcherPage />} />
+              <Route path="/vkintox" element={<ExternalRedirect to="https://vkintox.buwryy.net/" />} />
+              <Route path="/vkintox/docs" element={<ExternalRedirect to="https://vkintox.buwryy.net/docs" />} />
+              <Route path="/roseline" element={<ExternalRedirect to="https://roseline.buwryy.net/" />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPage />} />
+            </>
+          )}
         </Routes>
       </div>
 

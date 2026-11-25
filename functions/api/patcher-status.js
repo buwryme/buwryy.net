@@ -1,5 +1,5 @@
 const GIST_URL =
-  'https://gist.githubusercontent.com/buwryme/300e8b1048933c9b2bdf43d2983224e6/raw/tiktok-patcher-status';
+  'https://gist.buwryy.net/buwryy/7832535a24564e5d8356f99166dd6c5c/raw/HEAD/tiktok-patcher-status';
 
 export async function onRequestGet() {
   let message = 'working!';

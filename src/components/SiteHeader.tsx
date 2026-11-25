@@ -1,12 +1,13 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import RedirectModal from './RedirectModal';
+import ForgejoIcon from './ForgejoIcon';
 
 export interface HeaderNavItem {
     label: string;
     to: string;
     external?: boolean;
-    icon?: 'vkintox' | 'roseline' | 'github' | 'tiktok';
+    icon?: 'vkintox' | 'roseline' | 'forgejo' | 'tiktok';
     symbol?: string;
     iconOnly?: boolean;
     confirmExternal?: boolean;
@@ -37,6 +38,7 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
         visible: false,
     });
     const [confirmLink, setConfirmLink] = useState<string | null>(null);
+    const projectHost = /^(vkintox|roseline)\.buwryy\.net$/.test(window.location.hostname);
 
     const buttonStyle = (active: boolean) => ({
         display: 'inline-flex',
@@ -82,13 +84,9 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
             );
         }
 
-        if (item.icon === 'github')
+        if (item.icon === 'forgejo')
         {
-            return (
-                <svg viewBox="0 0 24 24" width={18} height={18} fill="currentColor" aria-hidden="true">
-                    <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-                </svg>
-            );
+            return <ForgejoIcon size={18} />;
         }
 
         return null;
@@ -143,29 +141,55 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
     return (
         <>
             <header className={`page-header animate-fade-in${scrolled ? ' is-scrolled' : ''}`}>
-                <Link
-                    to="/"
-                    className="header-logo-link"
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
-                >
-                    <div
-                        style={{
-                            width: '48px',
-                            height: '48px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'transform 0.3s var(--md-motion-spring-bouncy)',
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1) rotate(0deg)'; }}
+                {projectHost ? (
+                    <a
+                        href="https://buwryy.net/"
+                        className="header-logo-link"
+                        style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
                     >
-                        <span className="header-logo-mark" role="img" aria-label="buwryy.net logo" />
-                    </div>
-                    <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
-                        buwryy<span style={{ color: 'var(--md-on-surface-variant)' }}>.net</span>
-                    </span>
-                </Link>
+                        <div
+                            style={{
+                                width: '48px',
+                                height: '48px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'transform 0.3s var(--md-motion-spring-bouncy)',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1) rotate(0deg)'; }}
+                        >
+                            <span className="header-logo-mark" role="img" aria-label="buwryy.net logo" />
+                        </div>
+                        <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
+                            buwryy<span style={{ color: 'var(--md-on-surface-variant)' }}>.net</span>
+                        </span>
+                    </a>
+                ) : (
+                    <Link
+                        to="/"
+                        className="header-logo-link"
+                        style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
+                    >
+                        <div
+                            style={{
+                                width: '48px',
+                                height: '48px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'transform 0.3s var(--md-motion-spring-bouncy)',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1) rotate(0deg)'; }}
+                        >
+                            <span className="header-logo-mark" role="img" aria-label="buwryy.net logo" />
+                        </div>
+                        <span className="m3-title-large" style={{ color: 'var(--md-on-surface)' }}>
+                            buwryy<span style={{ color: 'var(--md-on-surface-variant)' }}>.net</span>
+                        </span>
+                    </Link>
+                )}
 
                 {nav && nav.length > 0 && (
                     <nav className="header-nav" aria-label="Site" ref={navRef}>
@@ -213,7 +237,6 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
                                         className={className}
                                         onClick={() => setConfirmLink(item.to)}
                                         aria-label={item.label}
-                                        style={item.icon === 'github' ? { color: isDark ? '#fff' : '#000' } : undefined}
                                     >
                                         {content}
                                     </button>
@@ -292,7 +315,7 @@ export default function SiteHeader({ isDark, onThemeChange, nav, onAction, activ
                 <RedirectModal
                     isOpen
                     onClose={closeConfirm}
-                    destination="github"
+                    destination={new URL(confirmLink).hostname.replace(/^www\./, '')}
                     url={confirmLink}
                 />
             )}

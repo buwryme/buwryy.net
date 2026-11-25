@@ -10,9 +10,9 @@ import { usePageIcon } from '../lib/usePageIcon';
 import { VKINTOX_NAV } from '../lib/vkNav';
 import './VKIntoxDocsPage.css';
 
-const INSTALL = 'curl -fsSL https://buwryy.net/api/vkintox/setup-script | bash';
-const UNINSTALL = 'curl -fsSL https://buwryy.net/api/vkintox/setup-script | bash -s -- uninstall';
-const BUILD = `git clone --recurse-submodules https://github.com/VKIntox/VKIntox.git
+const INSTALL = 'curl -fsSL https://vkintox.buwryy.net/setup | bash';
+const UNINSTALL = 'curl -fsSL https://vkintox.buwryy.net/setup | bash -s -- uninstall';
+const BUILD = `git clone --recurse-submodules https://git.buwryy.net/VKIntox/VKIntox.git
 cd VKIntox
 meson setup --buildtype=release --prefix=/usr build
 meson compile -C build
@@ -21,7 +21,7 @@ sudo meson install -C build`;
 const RUN = `ENABLE_VKINTOX=1 ./your-game
 # steam launch option:
 ENABLE_VKINTOX=1 %command%`;
-const LOCAL_SETUP = `git clone --recurse-submodules https://github.com/VKIntox/VKIntox.git
+const LOCAL_SETUP = `git clone --recurse-submodules https://git.buwryy.net/VKIntox/VKIntox.git
 cd VKIntox
 just configure
 ./setup system
@@ -184,7 +184,7 @@ export default function VKIntoxDocsPage()
                             </nav>
                             <div className="vk-docs-nav-meta">
                                 <span>v0.2.2</span>
-                                <a href="https://github.com/VKIntox/VKIntox" target="_blank" rel="noopener">source on github</a>
+                                <a href="https://git.buwryy.net/VKIntox/VKIntox" target="_blank" rel="noopener">source on forgejo</a>
                             </div>
                         </aside>
 
@@ -413,7 +413,7 @@ export default function VKIntoxDocsPage()
                                     The installer reads <code>EffectPackages.ini</code>, downloads each listed
                                     package, and groups it under <code>reshade/</code>. The built-in shaders live
                                     in their own package, built from the separate{' '}
-                                    <a href="https://github.com/VKIntox/VKIntoxEffects" target="_blank" rel="noopener">VKIntoxEffects</a>{' '}
+                                    <a href="https://git.buwryy.net/VKIntox/VKIntoxEffects" target="_blank" rel="noopener">VKIntoxEffects</a>{' '}
                                     repository. That package carries the built-in shaders: IntoxSSR, IntoxMXAO,
                                     IntoxDepthColorCorrection, MSAA, ExponentialFog, and IntoxRimlight.
                                 </p>
@@ -921,7 +921,7 @@ export default function VKIntoxDocsPage()
 
                             <div className="vk-docs-feedback">
                                 <span>Something wrong on this page?</span>
-                                <a href="https://github.com/buwryme/buwryy.net/issues/new/choose" target="_blank" rel="noopener">
+                                <a href="https://git.buwryy.net/buwryy/buwryy.net/issues/new" target="_blank" rel="noopener">
                                     open an issue
                                 </a>
                             </div>

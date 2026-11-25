@@ -7,7 +7,7 @@
 personal site & client-side tiktok patcher built with react & material design 3 expressive.
 
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](LICENSE)
-[![Patcher Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fbuwryy.net%2Fapi%2Fpatcher-status&style=flat-square)](https://github.com/buwryme/buwryy.net)
+[![Patcher Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fbuwryy.net%2Fapi%2Fpatcher-status&style=flat-square)](https://git.buwryy.net/buwryy/buwryy.net)
 
 </div>
 
@@ -24,7 +24,7 @@ personal site & client-side tiktok patcher built with react & material design 3 
 ## usage
 
 ```bash
-git clone https://github.com/buwryme/buwryy.net.git
+git clone https://git.buwryy.net/buwryy/buwryy.net.git
 cd buwryy.net
 npm install
 npm run dev
@@ -62,7 +62,7 @@ site runs at `http://localhost:3000`. build for prod with `npm run build` → ou
 
 ## deployment
 
-push to github and import directly into **vercel** or **netlify**. for manual hosting, upload the `dist/` folder after building.
+push to **git.buwryy.net**; the GitHub mirror feeds Cloudflare Pages. for manual hosting, upload the `dist/` folder after building.
 
 ---
 
@@ -72,4 +72,4 @@ for inquiries contact **hello@buwryy.net**
 
 <div align="center">
 
-**made with ♥ by [buwryme](https://github.com/buwryme)**
+**made with ♥ by [buwryy](https://git.buwryy.net/buwryy)**

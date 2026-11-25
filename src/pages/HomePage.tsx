@@ -7,6 +7,7 @@ import PrivacyModal from '../components/PrivacyModal';
 import AcknowledgementsModal from '../components/AcknowledgementsModal';
 import CookieShape from '../components/CookieShape';
 import SiteHeader from '../components/SiteHeader';
+import ForgejoIcon from '../components/ForgejoIcon';
 import RainbowWord from '../components/RainbowWord';
 import { HOME_NAV } from '../lib/homeNav';
 import { useSiteTheme } from '../lib/useSiteTheme';
@@ -202,7 +203,7 @@ export default function HomePage() {
             welcome to my website! it is very cool please check it out i took my dear time to make this :&gt;
           </p>
           <div className="home-actions">
-            <Link to="/vkintox" className="m3-btn-filled">see VKIntox</Link>
+            <a href="https://vkintox.buwryy.net/" className="m3-btn-filled">see VKIntox</a>
             <Link to="/blog" className="m3-btn-tonal">read my blog</Link>
           </div>
         </section>
@@ -323,18 +324,18 @@ export default function HomePage() {
 }
 
 const PROJECTS: { name: string; tagline: string; icon: string; href?: string; to?: string }[] = [
-  { name: 'sharptape', tagline: 'topaz video ai alternative for linux', icon: '/assets/sharptape.svg', href: 'https://github.com/buwryme/sharptape' },
-  { name: 'tikutils', tagline: 'patch tiktok videos losslessly', icon: '/assets/tikutils.svg', href: 'https://github.com/buwryme/tikutils' },
-  { name: 'vkintox', tagline: 'reshade with proper depth, for linux', icon: '/assets/vkintox.svg', to: '/vkintox' },
-  { name: 'roséline', tagline: "run roblox's macos builds on linux", icon: '/assets/roseline.svg', to: '/roseline' },
-  { name: 'netblog', tagline: 'blog manager for this website.\npowered by a github gist.', icon: '/assets/netblog.svg', href: 'https://github.com/buwryme/buwryy.net/tree/main/netblog' },
-  { name: 'this website', tagline: 'this website is open source, too!\ndid you know it is serverless?', icon: '/assets/logo.svg', href: 'https://github.com/buwryme/buwryy.net' },
+  { name: 'sharptape', tagline: 'topaz video ai alternative for linux', icon: '/assets/sharptape.svg', href: 'https://git.buwryy.net/buwryy/sharptape' },
+  { name: 'tikutils', tagline: 'patch tiktok videos losslessly', icon: '/assets/tikutils.svg', href: 'https://git.buwryy.net/buwryy/tikutils' },
+  { name: 'vkintox', tagline: 'reshade with proper depth, for linux', icon: '/assets/vkintox.svg', href: 'https://vkintox.buwryy.net/' },
+  { name: 'roséline', tagline: "run roblox's macos builds on linux", icon: '/assets/roseline.svg', href: 'https://roseline.buwryy.net/' },
+  { name: 'netblog', tagline: 'blog manager for this website.\npowered by a gist.', icon: '/assets/netblog.svg', href: 'https://git.buwryy.net/buwryy/buwryy.net/src/branch/main/netblog' },
+  { name: 'this website', tagline: 'this website is open source, too!\ndid you know it is serverless?', icon: '/assets/logo.svg', href: 'https://git.buwryy.net/buwryy/buwryy.net' },
 ];
 
 const socials = [
   { name: 'TikTok', handle: '@buwryy', icon: 'tiktok', url: 'https://tiktok.com/@buwryy' },
   { name: 'Twitter / X', handle: '@buwryme', icon: 'x', url: 'https://x.com/buwryme' },
-  { name: 'GitHub', handle: 'buwryme', icon: 'github', url: 'https://github.com/buwryme' },
+  { name: 'Forgejo', handle: 'buwryy', icon: 'forgejo', url: 'https://git.buwryy.net/buwryy' },
   { name: 'Discord', handle: 'Join server', icon: 'discord', url: 'https://discord.gg/HrUrzXAxPV' },
   { name: 'Email', handle: 'hello@buwryy.net', icon: 'email', url: 'mailto:hello@buwryy.net' },
 ];
@@ -353,15 +354,6 @@ function XIcon() {
     <svg width="26" height="26" viewBox="-0.5 -0.5 17 16" className="social-icon">
       <path className="social-icon-outline" d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" fill="none" stroke="currentColor" strokeWidth="0.8"/>
       <path className="social-icon-filled" d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" fill="currentColor"/>
-    </svg>
-  );
-}
-
-function GitHubIcon() {
-  return (
-    <svg width="26" height="26" viewBox="-1 -1 26 26" className="social-icon">
-      <path className="social-icon-outline" d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-      <path className="social-icon-filled" d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" fill="currentColor"/>
     </svg>
   );
 }
@@ -389,7 +381,7 @@ function SocialIcon({ type }: { type: string }) {
   switch (type) {
     case 'tiktok': return <span style={style}><TikTokIcon /></span>;
     case 'x': return <span style={style}><XIcon /></span>;
-    case 'github': return <span style={style}><GitHubIcon /></span>;
+    case 'forgejo': return <span style={style}><ForgejoIcon size={20} /></span>;
     case 'discord': return <span style={style}><DiscordIcon /></span>;
     case 'email': return <span style={style}><EmailIcon /></span>;
     default: return null;

@@ -6,9 +6,9 @@ export const VKINTOX_NAV: HeaderNavItem[] = [
     { label: 'Try it out', to: '/vkintox', state: { scrollTo: 'effects' }, navKey: 'effects' },
     { label: 'Documentation', to: '/vkintox/docs' },
     {
-        label: 'GitHub',
-        to: 'https://github.com/VKIntox/VKIntox',
-        icon: 'github',
+        label: 'Forgejo',
+        to: 'https://git.buwryy.net/VKIntox/VKIntox',
+        icon: 'forgejo',
         iconOnly: true,
         confirmExternal: true,
     },

@@ -311,7 +311,7 @@ export default function AboutMePage() {
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
-                  onClick={() => setProjectModal({ name: 'sharptape', description: 'topaz video ai alternative for linux. made with gtk4/libadwaita', repoUrl: 'https://github.com/buwryme/sharptape', iconSrc: '/assets/sharptape.svg', downloadUrl: 'https://github.com/buwryme/sharptape/releases' })}
+                  onClick={() => setProjectModal({ name: 'sharptape', description: 'topaz video ai alternative for linux. made with gtk4/libadwaita', repoUrl: 'https://git.buwryy.net/buwryy/sharptape', iconSrc: '/assets/sharptape.svg', downloadUrl: 'https://git.buwryy.net/buwryy/sharptape/releases' })}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';
@@ -328,7 +328,7 @@ export default function AboutMePage() {
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
-                  onClick={() => setProjectModal({ name: 'tikutils', description: 'patch tiktok videos to upload losslessly & download/analyze videos. made with gtk4/libadwaita', repoUrl: 'https://github.com/buwryme/tikutils', iconSrc: '/assets/tikutils.svg', downloadUrl: 'https://github.com/buwryme/tikutils/releases' })}
+                  onClick={() => setProjectModal({ name: 'tikutils', description: 'patch tiktok videos to upload losslessly & download/analyze videos. made with gtk4/libadwaita', repoUrl: 'https://git.buwryy.net/buwryy/tikutils', iconSrc: '/assets/tikutils.svg', downloadUrl: 'https://git.buwryy.net/buwryy/tikutils/releases' })}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';
@@ -345,7 +345,7 @@ export default function AboutMePage() {
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
-                  onClick={() => setProjectModal({ name: 'vkintox', description: 'roblox shaders like reshade for sober, an android runtime for linux!', repoUrl: 'https://github.com/buwryme/vkintox', iconSrc: '/assets/vkintox.svg', downloadUrl: 'https://github.com/VKIntox/VKIntox/releases' })}
+                  onClick={() => setProjectModal({ name: 'vkintox', description: 'roblox shaders like reshade for sober, an android runtime for linux!', repoUrl: 'https://git.buwryy.net/VKIntox/VKIntox', iconSrc: '/assets/vkintox.svg', downloadUrl: 'https://git.buwryy.net/VKIntox/VKIntox/releases' })}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';
@@ -362,7 +362,7 @@ export default function AboutMePage() {
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
-                  onClick={() => setProjectModal({ name: 'roséline', description: 'run the macOS builds of Roblox with ease, using Rosemary.', repoUrl: 'https://github.com/buwryme/Roseline', iconSrc: '/assets/roseline.svg', downloadUrl: 'https://github.com/buwryme/Roseline/releases' })}
+                  onClick={() => setProjectModal({ name: 'roséline', description: 'run the macOS builds of Roblox with ease, using Rosemary.', repoUrl: 'https://git.buwryy.net/buwryy/Roseline', iconSrc: '/assets/roseline.svg', downloadUrl: 'https://git.buwryy.net/buwryy/Roseline/releases' })}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';
@@ -379,7 +379,7 @@ export default function AboutMePage() {
                 <div 
                   className="m3-card" 
                   style={{ padding: '16px', cursor: 'pointer', transition: 'all 0.2s var(--md-motion-spring-bouncy)' }}
-                  onClick={() => setProjectModal({ name: 'this website', description: 'this website is fully open source!', repoUrl: 'https://github.com/buwryme/buwryy.net', iconSrc: '/assets/logo.svg' })}
+                  onClick={() => setProjectModal({ name: 'this website', description: 'this website is fully open source!', repoUrl: 'https://git.buwryy.net/buwryy/buwryy.net', iconSrc: '/assets/logo.svg' })}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--md-elevation-1)';

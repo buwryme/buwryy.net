@@ -25,7 +25,7 @@ import {
   u32,
 } from './slsrPatch';
 
-const COMMENT = 'Patched by https://github.com/buwryme/tiktok-lossless-upload';
+const COMMENT = 'Patched by https://git.buwryy.net/buwryy/tiktok-lossless-upload';
 
 function buildAacConfig(rateIndex: number): Uint8Array {
   const bits: string[] = [];

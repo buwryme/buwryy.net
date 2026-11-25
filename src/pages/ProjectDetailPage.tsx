@@ -17,20 +17,20 @@ const projectsData: Record<string, ProjectData> = {
   sharptape: {
     name: 'sharptape',
     description: 'lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    repoUrl: 'https://github.com/buwryme/sharptape',
+    repoUrl: 'https://git.buwryy.net/buwryy/sharptape',
     iconSrc: '/assets/sharptape.svg',
   },
   tikutils: {
     name: 'tikutils',
     description: 'lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    repoUrl: 'https://github.com/buwryme/tikutils',
+    repoUrl: 'https://git.buwryy.net/buwryy/tikutils',
     iconSrc: '/assets/tikutils.svg',
   },
   vkintox: {
     name: 'vkintox',
     description: 'lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     icon: 'sports_esports',
-    repoUrl: 'https://github.com/buwryme/vkintox',
+    repoUrl: 'https://git.buwryy.net/VKIntox/VKIntox',
   },
 };
 

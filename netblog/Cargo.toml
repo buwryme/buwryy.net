@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 license = "GPL-3.0-or-later"
 description = "A focused GTK4 blog editor for buwryy.net"
-repository = "https://github.com/buwryme/buwryy.net"
+repository = "https://git.buwryy.net/buwryy/buwryy.net"
 
 [dependencies]
 async-channel = "2"

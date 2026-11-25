@@ -40,11 +40,9 @@ MSG
 fi
 ok "GTK dependencies found"
 
-if ! command -v gh >/dev/null 2>&1; then
-  die "missing gh — install the GitHub CLI and run: gh auth login"
-fi
-if ! gh auth status >/dev/null 2>&1; then
-  say "gh is installed but not signed in; run: gh auth login"
+need_cmd curl
+if [[ -z "${NETBLOG_OPENGIST_TOKEN:-}" && ! -s "${XDG_CONFIG_HOME:-$HOME/.config}/opengist/api-token" ]]; then
+  say "no Opengist token yet; save one at ${XDG_CONFIG_HOME:-$HOME/.config}/opengist/api-token"
 fi
 
 section "building Netblog"
