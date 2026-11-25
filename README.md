@@ -7,6 +7,7 @@
 personal site & client-side tiktok patcher built with react & material design 3 expressive.
 
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](LICENSE)
+[![Build Check](https://github.com/buwryme/buwryy.net/actions/workflows/build.yml/badge.svg?branch=main&style=flat-square)](https://github.com/buwryme/buwryy.net/actions/workflows/build.yml)
 [![Patcher Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fbuwryy.net%2Fapi%2Fpatcher-status&style=flat-square)](https://git.buwryy.net/buwryy/buwryy.net)
 
 </div>
