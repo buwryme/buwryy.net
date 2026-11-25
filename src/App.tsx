@@ -38,6 +38,10 @@ function App() {
       if (!anchor || anchor.dataset.noRedirect === 'true') return
       const href = anchor.getAttribute('href') || ''
       if (!/^https?:\/\//i.test(href)) return
+      try {
+        const host = new URL(href).hostname.replace(/^www\./, '')
+        if (host === 'buwryy.net' || host.endsWith('.buwryy.net')) return
+      } catch { /* keep the raw href */ }
       event.preventDefault()
       let destination = href
       try {
